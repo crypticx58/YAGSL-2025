@@ -12,6 +12,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem swerveSubsystem = SwerveSubsystem.getInstance();
+
   private SendableChooser<Command> autoChooser;
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverXbox =
@@ -36,9 +40,9 @@ public class RobotContainer {
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
                                                                 () -> driverXbox.getLeftY(),
                                                                 () -> driverXbox.getLeftX())
-                                                            .withControllerRotationAxis(driverXbox::getRightX)
+                                                            .withControllerRotationAxis(()->driverXbox.getRightX())
                                                             .deadband(OperatorConstants.DEADBAND)
-                                                            .scaleTranslation(0.7).scaleRotation(0.7)
+                                                            .scaleTranslation(0.75).scaleRotation(0.75)
                                                             .allianceRelativeControl(true);
   public RobotContainer() {
     //Configure the trigger bindings
@@ -51,6 +55,13 @@ public class RobotContainer {
     Command driveFieldOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveAngularVelocity);
     driverXbox.b().onTrue(Commands.runOnce(()->swerveSubsystem.zeroGyro(), swerveSubsystem));
     swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+
+    if (Robot.isSimulation())
+    {
+      driverXbox.a().onTrue(Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
+    }
+
+    // Quick code to test arm mechanism
     // SparkMax sparkmax = new SparkMax(2, MotorType.kBrushless);
     // swerveSubsystem.setDefaultCommand(Commands.run(()->{
     //   if (Math.abs(driverXbox.getLeftY())>0.3){

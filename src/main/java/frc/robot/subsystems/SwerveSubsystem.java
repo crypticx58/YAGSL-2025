@@ -65,15 +65,15 @@ public class SwerveSubsystem extends SubsystemBase {
     // Also, you can call addChild(name, sendableChild) to associate sendables with
     // the subsystem
     // such as SpeedControllers, Encoders, DigitalInputs, etc.
-    //SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
+    SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
     try {
-      swerveDrive = new SwerveParser(new File(Filesystem.getDeployDirectory(), "mk4i")).createSwerveDrive(3.5);
+      swerveDrive = new SwerveParser(new File(Filesystem.getDeployDirectory(), "mk4i")).createSwerveDrive(4.5);
       swerveController = swerveDrive.getSwerveController();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     swerveDrive.setHeadingCorrection(false);
-    swerveDrive.setCosineCompensator(true);
+    swerveDrive.setCosineCompensator(false);
     //swerveDrive.pushOffsetsToEncoders();
     setupPathPlanner();
 

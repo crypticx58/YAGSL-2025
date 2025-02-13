@@ -74,6 +74,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     swerveDrive.setHeadingCorrection(false);
     swerveDrive.setCosineCompensator(false);
+    //swerveDrive.setAngularVelocityCompensation(true, false, -0.15);
     //swerveDrive.pushOffsetsToEncoders();
     setupPathPlanner();
 

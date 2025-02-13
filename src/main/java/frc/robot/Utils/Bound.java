@@ -1,4 +1,4 @@
-package frc.robot.Utils;
+package frc.robot.utils;
 
 public class Bound {
     public final double UpperBound;

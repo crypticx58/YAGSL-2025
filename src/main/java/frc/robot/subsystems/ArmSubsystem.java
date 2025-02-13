@@ -34,7 +34,7 @@ import static java.util.Map.entry;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.Utils.JointType;
+import frc.robot.utils.JointType;
 
 public class ArmSubsystem extends SubsystemBase {
     private final static ArmSubsystem INSTANCE = new ArmSubsystem();

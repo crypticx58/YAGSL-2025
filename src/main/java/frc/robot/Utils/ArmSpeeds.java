@@ -1,4 +1,4 @@
-package frc.robot.Utils;
+package frc.robot.utils;
 
 // DPS = Degress Per Sec
 public class ArmSpeeds {

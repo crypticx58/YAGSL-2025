@@ -1,10 +1,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Utils.ArmSpeeds;
-import frc.robot.Utils.JointType;
-import frc.robot.Utils.InputsManager.ForwardKinematicsInputsManager;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.utils.ArmSpeeds;
+import frc.robot.utils.JointType;
+import frc.robot.utils.InputsManager.ForwardKinematicsInputsManager;
 
 
 public class ArmControllerCommand extends Command {

@@ -35,13 +35,13 @@ public class RobotContainer {
   private SendableChooser<Command> autoChooser;
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverXbox =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+      new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
   
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
                                                                 () -> driverXbox.getLeftY(),
                                                                 () -> driverXbox.getLeftX())
                                                             .withControllerRotationAxis(()->driverXbox.getRightX())
-                                                            .deadband(OperatorConstants.DEADBAND)
+                                                            .deadband(OperatorConstants.SWERVE_DEADBAND)
                                                             .scaleTranslation(0.75).scaleRotation(0.75)
                                                             .allianceRelativeControl(true);
   public RobotContainer() {

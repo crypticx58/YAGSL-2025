@@ -1,14 +1,11 @@
 package frc.robot.utils;
 
-import java.util.ArrayList;
-
 import edu.wpi.first.math.util.Units;
 
 public enum JointType {
-    Shoulder(5, 150, 1, new Bound(0,200)),
-    Telescopic(6, 5, 1, new Bound(Units.inchesToMeters(25), Units.inchesToMeters(46.5))),
-    Wrist(7, 50, 1, new Bound(0,270)),
-    Intake(8, 1, 1, new Bound(0,360));
+    Shoulder(5, 1/150, 100, new Bound(-1,145)),
+    Telescopic(6, 1/5, Units.inchesToMeters(24), new Bound(Units.inchesToMeters(23.5), Units.inchesToMeters(52))),
+    Wrist(7, 1/45, 180, new Bound(-95,100));
     public final int ID;
     public final double gearRatio;
     public final double maxSpeed; // DegreesPerSec for rotational or MetersPerSec for linear
@@ -23,19 +20,4 @@ public enum JointType {
         this.lowerBound = rangeOfMotion.LowerBound;
         this.upperBound = rangeOfMotion.UpperBound;
     }
-    // public int ID(){
-    //     return id;
-    // }
-    // public double gearRatio(){
-    //     return gearRatio;
-    // }
-    // public double lowerBound(){
-    //     return rangeOfMotion.LowerBound;
-    // }
-    // public double upperBound(){
-    //     return rangeOfMotion.UpperBound;
-    // }
-    //  public double maxSpeed(){
-    //      return maxSpeed;
-    // }
 }

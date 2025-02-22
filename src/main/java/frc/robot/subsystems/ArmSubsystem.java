@@ -96,8 +96,9 @@ public class ArmSubsystem extends SubsystemBase {
     }
     private void configureOffsets(){
         ShoulderJoint.getEncoder().setPosition(0); // figure out (Degrees)
-        TelescopicJoint.getEncoder().setPosition(0); // figure out (Meters)
-        WristJoint.getEncoder().setPosition(0); // figure out (Degrees)
+        ShoulderJoint.getEncoder().setPosition(-1); 
+        TelescopicJoint.getEncoder().setPosition(Units.inchesToMeters(23.5)); 
+        WristJoint.getEncoder().setPosition(-90);
     }
     public void setJointPosition(JointType jointType, double jointPosition){ // Degrees or Inches
         Joints.get(jointType).getClosedLoopController().setReference(jointPosition, ControlType.kPosition);

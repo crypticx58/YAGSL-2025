@@ -15,6 +15,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
+import frc.robot.utils.ArmConfiguration;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -31,13 +33,21 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
   public static class OperatorConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
+    public static final int ARM_CONTROLLER_PORT = 1;
     public static final double ARM_SPEEDS_DEADBAND = 0.3;
     public static final double SWERVE_DEADBAND = 0.3;
   }
 
   public static class ArmConstants {
     public static final Pose3d BasePose3d = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
-    public static final double WristJointLengthMeters = Units.inchesToMeters(4);// TODO
+    public static final double ShoulderJointHeightOffGroundMeters = Units.inchesToMeters(16);
+
+    public static final double CoralHorizontalScoringDistance = Units.inchesToMeters(19); // With bumpers, 4 inches
+    //public static final double OptimalCoralScoringWristAngleDegrees = 45; // Relative to the front
+
+    public static final double OptimalCoralStationFeedDistance = Units.inchesToMeters(19); // With bumpers, 4 inches
+
+    public static final double WristJointLengthMeters = Units.inchesToMeters(4); //TODO
     public static final Transform3d RobotToShoulderJointTransform = new Transform3d(
         new Translation3d(-Units.inchesToMeters(10.5), Units.inchesToMeters(14), 0),
         new Rotation3d(0, 0, 0)); // TODO
@@ -52,9 +62,10 @@ public final class Constants {
   public static class VisionConstants {
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-    public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-    public static final Transform3d BaseToSideCameraTransform = new Transform3d(
-        new Translation3d(0, 0, 0),
+    // Simply a handmade offset relative to the tip of the reef branch describin where the arm should be to drop the note onto the coral
+    // Also we will probably be using a single angle for all the reefs
+    public static final Transform3d IntakeOffsetFromReefBranch = new Transform3d(
+        new Translation3d(Units.inchesToMeters(3), 0, Units.inchesToMeters(3)),
         new Rotation3d(0, 0, 0));
     public static final Transform3d RobotToPhotonCameraTransform3d = new Transform3d(
         new Translation3d(0, 0, 0),

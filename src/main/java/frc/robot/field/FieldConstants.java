@@ -7,16 +7,23 @@
 
 package frc.robot.field;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,13 +32,13 @@ import java.util.Map;
  */
 public class FieldConstants
 {
-
+  public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   public static final double fieldLength   = Units.inchesToMeters(690.876);
   public static final double fieldWidth    = Units.inchesToMeters(317);
   public static final double startingLineX =
       Units.inchesToMeters(299.438); // Measured from the inside of starting line
 
-  public enum ReefHeight
+  public static enum ReefHeight
   {
     L4(Units.inchesToMeters(72), 70),
     L3(Units.inchesToMeters(47.625), 35),
@@ -71,7 +78,10 @@ public class FieldConstants
 
   public static class CoralStation
   {
-
+    public static final double yOffsetMM = 540.08951;
+    //public static final double distanceBetweenGroovesMM = 203.2;
+    public static final double GrooveHeightOffset = Units.inchesToMeters(21.2633665354);
+    public static final double DistanceBetweenGrooves = Units.inchesToMeters(8);
     public static final Pose2d leftCenterFace  =
         new Pose2d(
             Units.inchesToMeters(33.526),
@@ -82,8 +92,16 @@ public class FieldConstants
             Units.inchesToMeters(33.526),
             Units.inchesToMeters(25.824),
             Rotation2d.fromDegrees(144.011 - 90));
+    public static final ArrayList<Transform3d> GrooveOffsets = new ArrayList<Transform3d>(9);
+    static
+    {
+        //There are 9 grooves in total so 4 on each side with one in the middle
+        for (int i=-4; i<=4; i++){
+            GrooveOffsets.add(new Transform3d(new Translation3d(0,i*DistanceBetweenGrooves,-GrooveHeightOffset), new Rotation3d()));
+        }
+    }
   }
-
+ 
   public static class Reef
   {
     public static final double LeftRightOffsetFromCenterMeters = Units.inchesToMeters(6.469);
@@ -174,7 +192,6 @@ public class FieldConstants
 
   public static class StagingPositions
   {
-
     // Measured from the center of the ice cream
     public static final Pose2d leftIceCream   =
         new Pose2d(Units.inchesToMeters(48), Units.inchesToMeters(230.5), new Rotation2d());

@@ -47,12 +47,10 @@ public class ArmSubsystem extends SubsystemBase {
     private final SparkMax ShoulderJoint = new SparkMax(JointType.Shoulder.ID, MotorType.kBrushless);
     private final SparkMax TelescopicJoint = new SparkMax(JointType.Telescopic.ID, MotorType.kBrushless);
     private final SparkMax WristJoint = new SparkMax(JointType.Wrist.ID, MotorType.kBrushless);
-    private final SparkMax IntakeJoint = new SparkMax(JointType.Intake.ID, MotorType.kBrushless);
 
-    private final PhotonCamera topCamera = new  PhotonCamera("TopCamera");
-    private final PhotonCamera sideCamera = new  PhotonCamera("SideCamera");
+    private final Map<JointType, SparkMax> Joints = Map.of(JointType.Shoulder, ShoulderJoint, JointType.Telescopic,
+            TelescopicJoint, JointType.Wrist, WristJoint);
     
-    private final Map<JointType, SparkMax> Joints = Map.of(JointType.Shoulder, ShoulderJoint, JointType.Telescopic, TelescopicJoint, JointType.Wrist, WristJoint, JointType.Intake, IntakeJoint);
     private ArmSubsystem() {
         configureConversionFactors();
         configureOffsets();
@@ -64,12 +62,11 @@ public class ArmSubsystem extends SubsystemBase {
         SparkMaxConfig ShoulderJointConfig = new SparkMaxConfig();
         SparkMaxConfig TelescopicJointConfig = new SparkMaxConfig();
         SparkMaxConfig WristJointConfig = new SparkMaxConfig();
-        SparkMaxConfig IntakeJointConfig = new SparkMaxConfig();
 
         ShoulderJointConfig.inverted(false).idleMode(IdleMode.kBrake);
         TelescopicJointConfig.inverted(true).idleMode(IdleMode.kBrake);
         WristJointConfig.inverted(false).idleMode(IdleMode.kBrake);
-        IntakeJointConfig.inverted(false).idleMode(IdleMode.kBrake);
+
 
 
         // Mechanism rotations in degrees or Meters
@@ -92,7 +89,6 @@ public class ArmSubsystem extends SubsystemBase {
         ShoulderJoint.configure(ShoulderJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         TelescopicJoint.configure(TelescopicJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         WristJoint.configure(WristJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        IntakeJoint.configure(IntakeJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
     private void configureOffsets(){
         ShoulderJoint.getEncoder().setPosition(0); // figure out (Degrees)

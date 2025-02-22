@@ -5,11 +5,9 @@ public class ArmSpeeds {
     public final double ShoulderSpeedDPS;
     public final double TelescopicSpeedMPS;
     public final double WristSpeedDPS;
-    public final double IntakeSpeedPercent;
-    public ArmSpeeds(double shoulderSpeedDPS, double telescopicSpeedMPS, double wristSpeedDPS, double intakeSpeedPercent){
+    public ArmSpeeds(double shoulderSpeedDPS, double telescopicSpeedMPS, double wristSpeedDPS){
         this.ShoulderSpeedDPS = shoulderSpeedDPS;
         this.TelescopicSpeedMPS = telescopicSpeedMPS;
         this.WristSpeedDPS = wristSpeedDPS;
-        this.IntakeSpeedPercent = intakeSpeedPercent;
     }
 }

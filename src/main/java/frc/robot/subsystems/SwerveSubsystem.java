@@ -1,11 +1,15 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,11 +21,7 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import java.io.File;
 import java.util.function.Supplier;
 
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
-import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.VisionSystemSim;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.RobotConfig;
@@ -181,6 +181,33 @@ public class SwerveSubsystem extends SubsystemBase {
     return run(() -> {
       swerveDrive.driveFieldOriented(velocity.get());
     });
+  }
+  public Command drive(Supplier<ChassisSpeeds> velocity) {
+    return run(() -> {
+      swerveDrive.drive(velocity.get());
+    });
+  }
+  public ChassisSpeeds chassisSpeedsForSwerveSetpointWithPID(Pose2d swervePoseSetpoint, PIDController translationalPIDController, PIDController rotationalPIDController){
+    Pose2d robotPose = swerveDrive.getPose();
+    Vector<N2> robotVec = robotPose.getTranslation().toVector();
+    Vector<N2> targetPoseRelativeToRobotPose = swervePoseSetpoint.getTranslation().toVector().minus(robotVec);
+    double distanceFromTarget = targetPoseRelativeToRobotPose.norm();
+
+    Vector<N2> traversalVector = new Vector<N2>(Nat.N2());
+    traversalVector.set(0,0,targetPoseRelativeToRobotPose.get(0,0));
+    traversalVector.set(1,0,targetPoseRelativeToRobotPose.get(1,0));
+    traversalVector = traversalVector.unit().times(-translationalPIDController.calculate(distanceFromTarget));
+
+    Vector<N2> robotForwardVec = robotPose.transformBy(new Transform2d(1, 0, new Rotation2d())).getTranslation().toVector().minus(robotVec);
+    Vector<N2> robotLateralVec = robotPose.transformBy(new Transform2d(0, 1, new Rotation2d())).getTranslation().toVector().minus(robotVec);
+
+    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+        robotForwardVec.norm()*traversalVector.dot(robotForwardVec),
+        robotLateralVec.norm()*traversalVector.dot(robotLateralVec),
+        Units.degreesToRadians(rotationalPIDController.calculate(robotPose.getRotation().getDegrees()))         
+    );
+
+    return chassisSpeeds;
   }
 
   public void zeroGyro(){

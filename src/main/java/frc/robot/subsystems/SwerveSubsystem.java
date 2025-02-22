@@ -115,9 +115,9 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic
               // drive trains
-              new PIDConstants(4.25, 0.0, 0),
+              new PIDConstants(4.75, 0.0, 0),
               // Translation PID constants
-              new PIDConstants(4.65, 0.0, 0)
+              new PIDConstants(3.95, 0.0, 0)
           // Rotation PID constants
           ),
           config,
@@ -128,10 +128,10 @@ public class SwerveSubsystem extends SubsystemBase {
             // This will flip the path being followed to the red side of the field.
             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-            var alliance = DriverStation.getAlliance();
-            if (alliance.isPresent()) {
-              return alliance.get() == DriverStation.Alliance.Red;
-            }
+            // var alliance = DriverStation.getAlliance();
+            // if (alliance.isPresent()) {
+            //   return alliance.get() == DriverStation.Alliance.Red;
+            // }
             return false;
           },
           this

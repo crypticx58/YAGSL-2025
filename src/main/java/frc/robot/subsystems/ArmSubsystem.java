@@ -1,12 +1,10 @@
 package frc.robot.subsystems;
 
-
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -17,30 +15,21 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
-import static java.util.Map.entry;
-
-import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.utils.ArmConfiguration;
 import frc.robot.utils.JointType;
 
 public class ArmSubsystem extends SubsystemBase {
-    private final static ArmSubsystem INSTANCE = new ArmSubsystem();
+    private static ArmSubsystem INSTANCE;
 
     @SuppressWarnings("WeakerAccess")
     public static ArmSubsystem getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ArmSubsystem();
+        }
         return INSTANCE;
     }
 
@@ -50,15 +39,16 @@ public class ArmSubsystem extends SubsystemBase {
 
     private final Map<JointType, SparkMax> Joints = Map.of(JointType.Shoulder, ShoulderJoint, JointType.Telescopic,
             TelescopicJoint, JointType.Wrist, WristJoint);
-    
+
     private ArmSubsystem() {
-        configureConversionFactors();
+        configureJoints();
         configureOffsets();
-        // configurePIDs();
-        PhotonCamera.setVersionCheckEnabled(false);
     }
-    private void configureConversionFactors(){
-        // Degrees
+    @Override
+    public void periodic(){
+    }
+
+    private void configureJoints() {
         SparkMaxConfig ShoulderJointConfig = new SparkMaxConfig();
         SparkMaxConfig TelescopicJointConfig = new SparkMaxConfig();
         SparkMaxConfig WristJointConfig = new SparkMaxConfig();
@@ -67,50 +57,98 @@ public class ArmSubsystem extends SubsystemBase {
         TelescopicJointConfig.inverted(true).idleMode(IdleMode.kBrake);
         WristJointConfig.inverted(false).idleMode(IdleMode.kBrake);
 
+        ShoulderJointConfig.encoder.positionConversionFactor(2.2359); // Degrees
+        TelescopicJointConfig.encoder.positionConversionFactor(0.0364823762189); // METERS
+        WristJointConfig.encoder.positionConversionFactor(8); // Degrees
 
+        ShoulderJointConfig.closedLoopRampRate(0.3);
+        TelescopicJointConfig.closedLoopRampRate(0.3);
+        WristJointConfig.closedLoopRampRate(0.3);
 
-        // Mechanism rotations in degrees or Meters
-        ShoulderJointConfig.encoder.positionConversionFactor(JointType.Shoulder.gearRatio*360);
-        TelescopicJointConfig.encoder.positionConversionFactor(JointType.Telescopic.gearRatio*1);//Figure out the factor
-        WristJointConfig.encoder.positionConversionFactor(JointType.Wrist.gearRatio*360);
-        //IntakeJointConfig.encoder.positionConversionFactor(Constants.ArmConstants.IntakeJointGearRatio*360);
+        ShoulderJointConfig.encoder.velocityConversionFactor(0.04); // Degrees PER SEC
+        TelescopicJointConfig.encoder.velocityConversionFactor(0.000608039603648); // METERS per sec
+        WristJointConfig.encoder.velocityConversionFactor(0.133333333333); // Degrees per sec
 
-        // Degrees per second, DPS
-        ShoulderJointConfig.encoder.velocityConversionFactor(JointType.Shoulder.gearRatio*360*60);
-        TelescopicJointConfig.encoder.velocityConversionFactor(JointType.Telescopic.gearRatio*1*60);//Figure out the factor, MPS, Meters Per Sec
-        WristJointConfig.encoder.velocityConversionFactor(JointType.Wrist.gearRatio*360*60);
-        //IntakeJointConfig.encoder.velocityConversionFactor(Constants.ArmConstants.WristJointGearRatio*360*60);
+        ShoulderJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0045, 0, 0.000, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
+        ShoulderJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.030, 0, 0.000, ClosedLoopSlot.kSlot1).outputRange(-1, 1);
 
-        ShoulderJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.04, 0, 0);
-        TelescopicJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.04, 0, 0);
-        WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.04, 0, 0);
-        //IntakeJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.04, 0, 0);
+        TelescopicJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.675, 0, 0, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
+        TelescopicJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(2.4, 0, 0.000, ClosedLoopSlot.kSlot1).outputRange(-1, 1);
 
-        ShoulderJoint.configure(ShoulderJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        TelescopicJoint.configure(TelescopicJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0020, 0, 0.000, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
+        WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.01, 0, 0.000, ClosedLoopSlot.kSlot1).outputRange(-1, 1);
+
+        ShoulderJoint.configure(ShoulderJointConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        TelescopicJoint.configure(TelescopicJointConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         WristJoint.configure(WristJointConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
-    private void configureOffsets(){
-        ShoulderJoint.getEncoder().setPosition(0); // figure out (Degrees)
+
+    private void configureOffsets() {
         ShoulderJoint.getEncoder().setPosition(-1); 
         TelescopicJoint.getEncoder().setPosition(Units.inchesToMeters(23.5)); 
         WristJoint.getEncoder().setPosition(-90);
     }
-    public void setJointPosition(JointType jointType, double jointPosition){ // Degrees or Inches
-        Joints.get(jointType).getClosedLoopController().setReference(jointPosition, ControlType.kPosition);
+    public void setPercentage(JointType jointType, double percentage){
+        Joints.get(jointType).set(percentage);
     }
-    public void setJointSpeed(JointType jointType, double jointSpeed){
-        if (jointType == JointType.Intake){
-            Joints.get(jointType).set(jointSpeed);
+    public void setJointPosition(JointType jointType, double jointPosition) {
+        double arbitraryFeedForward = 0;
+        if (jointType == JointType.Shoulder || jointType == JointType.Wrist){
+            arbitraryFeedForward = 0.25*Math.cos(Units.degreesToRadians(getJointPosition(jointType)));
+        }
+        if (!isPositionSetpointValid(jointType, jointPosition)){
+            Joints.get(jointType).getClosedLoopController().setReference(getJointPosition(jointType), ControlType.kPosition, ClosedLoopSlot.kSlot1, arbitraryFeedForward);
             return;
         }
-        Joints.get(jointType).getClosedLoopController().setReference(jointSpeed, ControlType.kVelocity);
+        Joints.get(jointType).getClosedLoopController().setReference(jointPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1, arbitraryFeedForward);
     }
-    public double getJointPosition(JointType jointType){ // Degrees or Inches
+
+    public void setJointVelocity(JointType jointType, double jointVelocity) {
+        double arbitraryFeedForward = 0;
+        if (jointType == JointType.Shoulder || jointType == JointType.Wrist){
+            arbitraryFeedForward = getJointPosition(jointType)<90 ? 0.25*Math.cos(Units.degreesToRadians(getJointPosition(jointType))):0;
+        } else if (jointType == JointType.Telescopic){
+            arbitraryFeedForward = 0.25*Math.sin(Units.degreesToRadians(getJointPosition(jointType)));
+        }
+        if (!isVelocitySetpointValid(jointType, jointVelocity)){
+            Joints.get(jointType).getClosedLoopController().setReference(0, ControlType.kVelocity, ClosedLoopSlot.kSlot0, arbitraryFeedForward);
+            return;
+        }
+        Joints.get(jointType).getClosedLoopController().setReference(jointVelocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0, arbitraryFeedForward);
+    }
+    public boolean isJointWithinRange(JointType jointType){
+        double jointPosition = getJointPosition(jointType);
+        return (jointPosition >= jointType.lowerBound) && (jointPosition <= jointType.upperBound);
+    }
+    public boolean isPositionSetpointValid(JointType jointType, double setpoint){
+        if (setpoint < jointType.lowerBound) return false;
+        if (setpoint > jointType.upperBound) return false;
+        return true;
+    }
+    public boolean isVelocitySetpointValid(JointType jointType, double setpoint){
+        if (getJointPosition(jointType) <= jointType.lowerBound && setpoint < 0) return false;
+        if (getJointPosition(jointType) >= jointType.upperBound && setpoint > 0) return false;
+        return true;
+    }
+    public double getJointPosition(JointType jointType) { // Degrees or Inches
         return Joints.get(jointType).getEncoder().getPosition();
     }
-    public void stopJointsInPlace(){
-        for (SparkMax joint : Joints.values()){
+    public boolean isJointAtSetpoint(JointType jointType, double setpoint, double tolerance){
+        return (Math.abs(getJointPosition(jointType)-setpoint)<=tolerance);
+    }
+    public boolean isArmAtDesiredConfiguration(ArmConfiguration armConfiguration, double shoulderTolerance, double telescopicTolerance, double WristTolerance){
+        return isJointAtSetpoint(JointType.Shoulder, armConfiguration.ShoulderPosition, shoulderTolerance) &&
+         isJointAtSetpoint(JointType.Telescopic, armConfiguration.TelescopicPosition, telescopicTolerance) &&
+         isJointAtSetpoint(JointType.Wrist, armConfiguration.WristPosition, WristTolerance);
+    }
+    public double getJointVelocity(JointType jointType) {
+        return Joints.get(jointType).getEncoder().getVelocity();
+    }
+    public void setJointEncoderPosition(JointType jointType, double position){
+        Joints.get(jointType).getEncoder().setPosition(position);
+    }
+    public void stopJointsInPlace() {
+        for (SparkMax joint : Joints.values()) {
             joint.getClosedLoopController().setReference(0, ControlType.kVelocity);
         }
     }

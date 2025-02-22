@@ -183,5 +183,66 @@ public class FieldConstants
     public static final Pose2d rightIceCream  =
         new Pose2d(Units.inchesToMeters(48), Units.inchesToMeters(86.5), new Rotation2d());
   }
-
+  public static class AprilTagIDs
+  {
+    public static final List<Integer> BlueAllianceReefIdsList = Arrays.asList(18);//,19,20,21,22,17);
+    public static final List<Integer> RedAllianceReefIdsList = Arrays.asList(10,9,8,7,6,11);
+    public static final List<Integer> BlueAllianceCoralStationIdsList = Arrays.asList(12,13);//,19,20,21,22,17);
+    public static final List<Integer> RedAllianceCoralStationIdsList = Arrays.asList(1,2);
+    public static final int BlueLeftCoralStationId = 13;
+    public static final int BlueRightCoralStationId = 12;
+    public static final int RedLeftCoralStationId = 1;
+    public static final int RedRightCoralStationId = 2;
+    public static List<Integer> getAllianceReefIds(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueAllianceReefIdsList;
+            } else {
+                return RedAllianceReefIdsList;
+            }
+        }
+        return BlueAllianceReefIdsList;
+    }
+    public static List<Integer> getAllianceCoralStationIds(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueAllianceCoralStationIdsList;
+            } else {
+                return RedAllianceCoralStationIdsList;
+            }
+        }
+        return BlueAllianceCoralStationIdsList;
+    }
+    public static int getLeftAllianceCoralStationId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueLeftCoralStationId;
+            } else {
+                return RedLeftCoralStationId;
+            }
+        }
+        return BlueLeftCoralStationId;
+    }
+    public static int getRightAllianceCoralStationId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueRightCoralStationId;
+            } else {
+                return RedRightCoralStationId;
+            }
+        }
+        return BlueRightCoralStationId;
+    }
+    // public enum BlueAllianceReefIds{
+    //     A(7),
+    //     LeftSpeaker(8),
+    //     Amp(6),
+    //     RightFeed(9),
+    //     LeftFeed(10);
+    //     public final int fiducialID;
+    //     BlueAllianceTargetIds(int fiducialID){
+    //         this.fiducialID = fiducialID;
+    //     }
+    // }
+  }
 }

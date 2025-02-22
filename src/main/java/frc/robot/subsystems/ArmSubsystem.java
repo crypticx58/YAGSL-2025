@@ -118,33 +118,45 @@ public class ArmSubsystem extends SubsystemBase {
             joint.getClosedLoopController().setReference(0, ControlType.kVelocity);
         }
     }
-    public Pose3d getCoralPose3dRelativeToRobot(Pose3d robotPose3d){
+    public void setArmConfiguration(ArmConfiguration armConfiguration){
+        setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+        setJointPosition(JointType.Telescopic, armConfiguration.TelescopicPosition);
+        setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
+    }
+
+    //Has to be called mulitiple times/periodically. Probably should NOT use to zero out the arm
+    public void setArmConfigurationOptimally(ArmConfiguration armConfiguration){
+        if (isJointAtSetpoint(JointType.Shoulder, armConfiguration.ShoulderPosition, 2.5)){
+            setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+            setJointPosition(JointType.Telescopic, armConfiguration.TelescopicPosition);
+            setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
+        } else if (getJointPosition(JointType.Shoulder) >= 25) { // We start moving the wrist
+            setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+            setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
+        } else {
+            setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+        }
+    }
+    public Pose3d getCoralPose3dRelativeToRobot(Pose3d robotPose3d) {
         double TelescopicLength = getJointPosition(JointType.Telescopic);
         double ShoulderAngle = getJointPosition(JointType.Shoulder);
         double WristAngle = getJointPosition(JointType.Wrist);
         Pose3d ShoulderJointPose3d = robotPose3d.plus(ArmConstants.RobotToShoulderJointTransform);
         Transform3d ShoulderJointToWristJointTransform3d = new Transform3d(
-            new Translation3d(TelescopicLength*Math.cos(Units.degreesToRadians(ShoulderAngle)),0,TelescopicLength*Math.sin(Units.degreesToRadians(ShoulderAngle))),
-            new Rotation3d());
-        
+                new Translation3d(TelescopicLength * Math.cos(Units.degreesToRadians(ShoulderAngle)), 0,
+                        TelescopicLength * Math.sin(Units.degreesToRadians(ShoulderAngle))),
+                new Rotation3d());
+
         Pose3d WristJointPos3d = ShoulderJointPose3d.plus(ShoulderJointToWristJointTransform3d);
-        //This goes from the wrist to the attachment point of the wrist and intake. It also gains the wrists orientation, making it equivalent to the normal vector of the attachment point.
+        // This goes from the wrist to the attachment point of the wrist and intake. It
+        // also gains the wrists orientation, making it equivalent to the normal vector
+        // of the attachment point.
         Transform3d wristJointToIntakeTransform3d = new Transform3d(
-            new Translation3d(ArmConstants.WristJointLengthMeters*Math.cos(Units.degreesToRadians(WristAngle)),0,ArmConstants.WristJointLengthMeters*Math.cos(Units.degreesToRadians(WristAngle))),
-            new Rotation3d(0,-Units.degreesToRadians(WristAngle),0));
+                new Translation3d(ArmConstants.WristJointLengthMeters * Math.cos(Units.degreesToRadians(WristAngle)), 0,
+                        ArmConstants.WristJointLengthMeters * Math.cos(Units.degreesToRadians(WristAngle))),
+                new Rotation3d(0, -Units.degreesToRadians(WristAngle), 0));
         Pose3d intakeAttachmentPointPose3d = WristJointPos3d.plus(wristJointToIntakeTransform3d);
         Pose3d coralPose3d = intakeAttachmentPointPose3d.plus(ArmConstants.IntakeToCoralTransform);
         return coralPose3d;
     }
-    // Gets the angle of the object with respect to the base from the top camera
-//     public Pose3d get3dPoseOfColoredObjectRelativeToBase(){
-//         PhotonPipelineResult topResult = topCamera.getLatestResult();
-//         PhotonPipelineResult sideResult = sideCamera.getLatestResult();
-//         PhotonTrackedTarget topTarget = topResult.getBestTarget();
-//         PhotonTrackedTarget sideTarget = topResult.getBestTarget();
-
-//         Pose3d targetPoseRelativeToTopCamera = ArmConstants.BasePose3d.plus(VisionConstants.BaseToTopCameraTransform).plus(topTarget.getBestCameraToTarget());
-//         Pose3d targetPoseRelativeToSideCamera = ArmConstants.BasePose3d.plus(VisionConstants.BaseToSideCameraTransform).plus(sideTarget.getBestCameraToTarget());
-
-    //}
 }

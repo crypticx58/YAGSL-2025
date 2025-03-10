@@ -5,8 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Utils.IntakeSensorsStates;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.utils.IntakeSensorsStates;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class IntakeCommand extends Command {
@@ -24,7 +24,7 @@ public class IntakeCommand extends Command {
   @Override
   public void execute() {
     IntakeSensorsStates intakeSensorsStates = intakeSubsystem.getIntakeSensorsStates();
-    if (!(intakeSensorsStates.EntranceSensorBlocked && intakeSensorsStates.ExitSensorBlocked)) intakeSubsystem.setIntakeVelocity(-1);
+    if (!(intakeSensorsStates.EntranceSensorBlocked && intakeSensorsStates.ExitSensorBlocked)) intakeSubsystem.setIntakeVelocity(0.125);
   }
 
   // Called once the command ends or is interrupted.

@@ -1,4 +1,4 @@
-package frc.robot.utils;
+package frc.robot.Utils;
 
 public class IntakeSensorsStates {
     public final boolean EntranceSensorBlocked, ExitSensorBlocked;

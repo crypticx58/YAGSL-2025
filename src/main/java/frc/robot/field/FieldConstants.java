@@ -96,7 +96,7 @@ public class FieldConstants
     static
     {
         //There are 9 grooves in total so 4 on each side with one in the middle
-        for (int i=-4; i<=4; i++){
+        for (int i=0; i<1; i++){
             GrooveOffsets.add(new Transform3d(new Translation3d(0,i*DistanceBetweenGrooves,-GrooveHeightOffset), new Rotation3d()));
         }
     }
@@ -104,7 +104,7 @@ public class FieldConstants
  
   public static class Reef
   {
-    public static final double LeftRightOffsetFromCenterMeters = Units.inchesToMeters(6.469);
+    public static final double LeftRightOffsetFromCenterMeters = Units.inchesToMeters(6.469+0.44);
     public static final Translation2d center         =
         new Translation2d(Units.inchesToMeters(176.746), Units.inchesToMeters(158.501));
     public static final double        faceToZoneLine =
@@ -202,9 +202,10 @@ public class FieldConstants
   }
   public static class AprilTagIDs
   {
-    public static final List<Integer> BlueAllianceReefIdsList = Arrays.asList(18);//,19,20,21,22,17);
+    public static final List<Integer> BlueAllianceReefIdsList = Arrays.asList(18,19,20,21,22,17);
     public static final List<Integer> RedAllianceReefIdsList = Arrays.asList(10,9,8,7,6,11);
-    public static final List<Integer> BlueAllianceCoralStationIdsList = Arrays.asList(12,13);//,19,20,21,22,17);
+    //public static final List<Integer> RedAllianceReefIdsList = Arrays.asList(11);
+    public static final List<Integer> BlueAllianceCoralStationIdsList = Arrays.asList(12,13);
     public static final List<Integer> RedAllianceCoralStationIdsList = Arrays.asList(1,2);
     public static final int BlueLeftCoralStationId = 13;
     public static final int BlueRightCoralStationId = 12;

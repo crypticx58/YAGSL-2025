@@ -16,7 +16,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Unit;
-import frc.robot.utils.ArmConfiguration;
+import frc.robot.Utils.ArmConfiguration;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -62,6 +62,11 @@ public final class Constants {
   public static class VisionConstants {
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+    public static final int AprilTagPipelineIndex = 0;
+    public static final int NeuralDetectorPipelineIndex = 1;
+    public static final String BackLimelightName = "limelight-back";
+    public static final String FrontLimelightName = "limelight-front";
+
     // Simply a handmade offset relative to the tip of the reef branch describin where the arm should be to drop the note onto the coral
     // Also we will probably be using a single angle for all the reefs
     public static final Transform3d IntakeOffsetFromReefBranch = new Transform3d(

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
+import swervelib.SwerveInputStream;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
@@ -115,9 +116,9 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic
               // drive trains
-              new PIDConstants(4.75, 0.0, 0),
+              new PIDConstants(4.5, 0.0, 0),
               // Translation PID constants
-              new PIDConstants(3.95, 0.0, 0)
+              new PIDConstants(3.75, 0.0, 0)
           // Rotation PID constants
           ),
           config,
@@ -153,20 +154,20 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720)));
   }
 
-  public Command pathfindToSetRange(Pose2d targetPose, double rangeMeters, boolean frontFacingTarget) {
-    Pose2d robotPose = swerveDrive.getPose();
-    Translation2d targetToRobot = robotPose.getTranslation().minus(targetPose.getTranslation());
-    // unit vec
-    Translation2d setPointTranslation = targetPose.getTranslation()
-        .plus(targetToRobot.div(targetToRobot.getNorm()).times(rangeMeters));
-    Rotation2d targetAngle = robotPose.getRotation()
-        .plus(PhotonUtils.getYawToPose(robotPose, targetPose))
-        .plus(Rotation2d.fromDegrees(frontFacingTarget ? 0 : 180));
+  // public Command pathfindToSetRange(Pose2d targetPose, double rangeMeters, boolean frontFacingTarget) {
+  //   Pose2d robotPose = swerveDrive.getPose();
+  //   Translation2d targetToRobot = robotPose.getTranslation().minus(targetPose.getTranslation());
+  //   // unit vec
+  //   Translation2d setPointTranslation = targetPose.getTranslation()
+  //       .plus(targetToRobot.div(targetToRobot.getNorm()).times(rangeMeters));
+  //   Rotation2d targetAngle = robotPose.getRotation()
+  //       .plus(PhotonUtils.getYawToPose(robotPose, targetPose))
+  //       .plus(Rotation2d.fromDegrees(frontFacingTarget ? 0 : 180));
 
-    return AutoBuilder.pathfindToPose(new Pose2d(new Translation2d(1, 1), new Rotation2d()),
-        new PathConstraints(swerveDrive.getMaximumChassisVelocity(), 4.5,
-            swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720)));
-  }
+  //   return AutoBuilder.pathfindToPose(new Pose2d(setPointTranslation, targetAngle),
+  //       new PathConstraints(swerveDrive.getMaximumChassisVelocity(), 4.5,
+  //           swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720)));
+  // }
 
   public void driveFieldOriented(ChassisSpeeds velocity) {
     swerveDrive.driveFieldOriented(velocity);
@@ -212,5 +213,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void zeroGyro(){
     swerveDrive.zeroGyro();
+  }
+
+  // Changes the "forward" for field oriented drive with affecting odometry
+  // public void zeroFieldOrientedHeading(){
+  //   swerveDrive.setFieldOrientedHeadingOffset(swerveDrive.getOdometryHeading());
+  // }
+  public void zeroFieldOrientedHeading(SwerveInputStream swerveInputStream){
+    swerveInputStream.translationHeadingOffset(true).translationHeadingOffset(swerveDrive.getOdometryHeading());
   }
 }

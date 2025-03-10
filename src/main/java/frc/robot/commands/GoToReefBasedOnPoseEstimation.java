@@ -13,11 +13,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Utils.ArmPreset;
 import frc.robot.field.FieldConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.utils.ArmPreset;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class GoToReefBasedOnPoseEstimation extends Command {
@@ -31,18 +31,18 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   boolean leftSide;
   Pose3d reefPose;
   Pose2d swervePoseSetpoint;
-  final PIDController translationalPidController = new PIDController(3.7, 0, 0);
-  final PIDController rotationalPidController = new PIDController(2.75, 0.00, 0);
+  final PIDController translationalPidController = new PIDController(3.4, 0, 0);
+  final PIDController rotationalPidController = new PIDController(2.6, 0.00, 0);
 
-  public GoToReefBasedOnPoseEstimation(boolean leftSide, ArmPreset armPreset) {
+  public GoToReefBasedOnPoseEstimation(boolean leftSide) {
     this.leftSide = leftSide;
     //this.reefHeight = reefHeight;
-    this.armPreset = armPreset;
+    //this.armPreset = armPreset;
     rotationalPidController.enableContinuousInput(-180, 180);
-    translationalPidController.setTolerance(Units.inchesToMeters(3));
+    translationalPidController.setTolerance(Units.inchesToMeters(1));
     //translationalPidController.setIZone(Units.inchesToMeters(8));
-    rotationalPidController.setTolerance(2.5);
-    addRequirements(swerveSubsystem, armSubsystem);
+    rotationalPidController.setTolerance(1);
+    addRequirements(swerveSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -88,7 +88,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
     
     //
     swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint, translationalPidController, rotationalPidController));
-    armSubsystem.setArmConfigurationOptimally(armPreset.armConfiguration);
+    //armSubsystem.setArmConfigurationOptimally(armPreset.armConfiguration);
   }
 
   // Called once the command ends or is interrupted.
@@ -100,6 +100,6 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return armSubsystem.isArmAtDesiredConfiguration(armPreset.armConfiguration, 2.5, Units.inchesToMeters(1), 2.5) && translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
+    return translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
   }
 }

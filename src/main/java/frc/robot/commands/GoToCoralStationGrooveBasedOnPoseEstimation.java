@@ -13,11 +13,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Utils.ArmConfiguration;
+import frc.robot.Utils.ArmPreset;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.utils.ArmConfiguration;
-import frc.robot.utils.ArmPreset;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
@@ -32,10 +32,10 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
 
   public GoToCoralStationGrooveBasedOnPoseEstimation() {
     rotationalPidController.enableContinuousInput(-180, 180);
-    translationalPidController.setTolerance(Units.inchesToMeters(2.5));
+    translationalPidController.setTolerance(Units.inchesToMeters(1));
     //translationalPidController.setIZone(Units.inchesToMeters(8));
-    rotationalPidController.setTolerance(2.5);
-    addRequirements(swerveSubsystem, armSubsystem);
+    rotationalPidController.setTolerance(1);
+    addRequirements(swerveSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -60,7 +60,7 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
   @Override
   public void execute() {
     swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint, translationalPidController, rotationalPidController));
-    armSubsystem.setArmConfigurationOptimally(armConfiguration);
+    //armSubsystem.setArmConfigurationOptimally(armConfiguration); Seperate driving controls from arm controls
   }
 
   // Called once the command ends or is interrupted.
@@ -72,6 +72,6 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return armSubsystem.isArmAtDesiredConfiguration(armConfiguration, 2.5, Units.inchesToMeters(1), 2.5) && translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
+    return translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
   }
 }

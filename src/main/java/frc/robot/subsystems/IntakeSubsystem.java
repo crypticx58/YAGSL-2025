@@ -13,6 +13,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Utils.IntakeOutakeState;
 import frc.robot.Utils.IntakeSensorsStates;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -28,6 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   private final SparkMax IntakeMotor = new SparkMax(8, MotorType.kBrushless);
+  private IntakeOutakeState intakeOutakeState = IntakeOutakeState.Idle;
   public boolean intaking = false;
   public boolean outaking = false;
 
@@ -36,7 +38,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private IntakeSubsystem() {
     SparkMaxConfig IntakeMotorConfig = new SparkMaxConfig();
-    IntakeMotorConfig.inverted(false).idleMode(IdleMode.kBrake);
+    IntakeMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(50);
     IntakeMotor.configure(IntakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -56,6 +58,25 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public IntakeSensorsStates getIntakeSensorsStates() { //sensor.get() returns "False" when blocked
     return new IntakeSensorsStates(!entranceBreakBeamSensor.get(), !exitBreakBeamSensor.get());
+  }
+
+  public void toggleIntake(double speed){
+    if (intakeOutakeState == IntakeOutakeState.Idle || intakeOutakeState == IntakeOutakeState.Outaking) {
+      setIntakeVelocity(speed);
+      intakeOutakeState = IntakeOutakeState.Intaking;
+    } else if (intakeOutakeState == IntakeOutakeState.Intaking) {
+      setIntakeVelocity(0);
+      intakeOutakeState = IntakeOutakeState.Idle;
+    }
+  }
+  public void toggleOutake(double speed){
+    if (intakeOutakeState == IntakeOutakeState.Idle || intakeOutakeState == IntakeOutakeState.Intaking) {
+      setIntakeVelocity(speed);
+      intakeOutakeState = IntakeOutakeState.Outaking;
+    } else if (intakeOutakeState == IntakeOutakeState.Outaking) {
+      setIntakeVelocity(0);
+      intakeOutakeState = IntakeOutakeState.Idle;
+    }
   }
 
   public void setIntakeVelocity(double velocity){ // percentage from -1.0 to 1.0

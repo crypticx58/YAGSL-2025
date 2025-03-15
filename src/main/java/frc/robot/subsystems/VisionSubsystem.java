@@ -45,6 +45,9 @@ public class VisionSubsystem extends SubsystemBase {
     // photonCamera = new PhotonCamera("PhotonCamera");
     // photonPoseEstimator = new PhotonPoseEstimator(FieldConstants.aprilTagFieldLayout,
     //     PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.RobotToPhotonCameraTransform3d);
+
+    // Warmup: 
+    FieldConstants.aprilTagFieldLayout.getTagPose(1).get();
   }
 
   // public Optional<EstimatedRobotPose> getPhotonEstimatedGlobalPose() {
@@ -177,5 +180,8 @@ public class VisionSubsystem extends SubsystemBase {
       }
     }
     return closestPose;
+  }
+  public Pose3d getProcessorId(){
+    return FieldConstants.aprilTagFieldLayout.getTagPose(FieldConstants.AprilTagIDs.getAllianceProcessorId()).get();
   }
 }

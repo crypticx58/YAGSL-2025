@@ -211,6 +211,8 @@ public class FieldConstants
     public static final int BlueRightCoralStationId = 12;
     public static final int RedLeftCoralStationId = 1;
     public static final int RedRightCoralStationId = 2;
+    public static final int BlueProcessorId = 16;
+    public static final int RedProcessorId = 3;
     public static List<Integer> getAllianceReefIds(){
         if (DriverStation.getAlliance().isPresent()){
             if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
@@ -251,16 +253,15 @@ public class FieldConstants
         }
         return BlueRightCoralStationId;
     }
-    // public enum BlueAllianceReefIds{
-    //     A(7),
-    //     LeftSpeaker(8),
-    //     Amp(6),
-    //     RightFeed(9),
-    //     LeftFeed(10);
-    //     public final int fiducialID;
-    //     BlueAllianceTargetIds(int fiducialID){
-    //         this.fiducialID = fiducialID;
-    //     }
-    // }
+    public static int getAllianceProcessorId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueProcessorId;
+            } else {
+                return RedProcessorId;
+            }
+        }
+        return BlueProcessorId;
+    }
   }
 }

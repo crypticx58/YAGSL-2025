@@ -39,6 +39,9 @@ public class SwerveSubsystem extends SubsystemBase {
   private static SwerveSubsystem INSTANCE;
   public final SwerveDrive swerveDrive;
   public final SwerveController swerveController;
+  final PIDController translationalPidController = new PIDController(3.7, 0, 0);
+  final PIDController rotationalPidController = new PIDController(2.75, 0.00, 0);
+  public Pose2d swervePoseSetpoint;
 
   /**
    * Returns the Singleton instance of this SwerveSubsystem. This static method
@@ -143,6 +146,9 @@ public class SwerveSubsystem extends SubsystemBase {
       // Handle exception as needed
       e.printStackTrace();
     }
+    rotationalPidController.enableContinuousInput(-180, 180);
+    translationalPidController.setTolerance(Units.inchesToMeters(1));
+    rotationalPidController.setTolerance(1);
 
     // Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
@@ -188,6 +194,12 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.drive(velocity.get());
     });
   }
+  public ChassisSpeeds chassisSpeedsForSwerveSetpointWithPID(){
+    return chassisSpeedsForSwerveSetpointWithPID(this.swervePoseSetpoint);
+  }
+  public ChassisSpeeds chassisSpeedsForSwerveSetpointWithPID(Pose2d swervePoseSetpoint){
+    return chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint, translationalPidController, rotationalPidController);
+  }
   public ChassisSpeeds chassisSpeedsForSwerveSetpointWithPID(Pose2d swervePoseSetpoint, PIDController translationalPIDController, PIDController rotationalPIDController){
     Pose2d robotPose = swerveDrive.getPose();
     Vector<N2> robotVec = robotPose.getTranslation().toVector();
@@ -209,6 +221,17 @@ public class SwerveSubsystem extends SubsystemBase {
     );
 
     return chassisSpeeds;
+  }
+  public boolean swerveSetpointReached(){
+    return translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
+  }
+  public void setSwervePoseSetpoint(Pose2d swervePoseSetpoint){
+    rotationalPidController.reset();
+    translationalPidController.reset();
+
+    translationalPidController.setSetpoint(0);
+    rotationalPidController.setSetpoint(swervePoseSetpoint.getRotation().getDegrees());
+    this.swervePoseSetpoint = swervePoseSetpoint;
   }
 
   public void zeroGyro(){

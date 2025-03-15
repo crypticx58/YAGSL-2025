@@ -27,14 +27,9 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
   Pose3d ClosestGroovePose;
   Pose2d swervePoseSetpoint;
   ArmConfiguration armConfiguration = ArmPreset.CoralStationFeed.armConfiguration;
-  final PIDController translationalPidController = new PIDController(3.7, 0, 0);
-  final PIDController rotationalPidController = new PIDController(2.75, 0.00, 0);
+  
 
   public GoToCoralStationGrooveBasedOnPoseEstimation() {
-    rotationalPidController.enableContinuousInput(-180, 180);
-    translationalPidController.setTolerance(Units.inchesToMeters(1));
-    //translationalPidController.setIZone(Units.inchesToMeters(8));
-    rotationalPidController.setTolerance(1);
     addRequirements(swerveSubsystem);
   }
 
@@ -48,18 +43,13 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
         new Rotation3d(0,0,Math.PI)
       )
     ).toPose2d();
-    
-    translationalPidController.reset();
-    rotationalPidController.reset();
-
-    rotationalPidController.setSetpoint(swervePoseSetpoint.getRotation().getDegrees());
-    translationalPidController.setSetpoint(0);
+    swerveSubsystem.setSwervePoseSetpoint(swervePoseSetpoint);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint, translationalPidController, rotationalPidController));
+    swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint));
     //armSubsystem.setArmConfigurationOptimally(armConfiguration); Seperate driving controls from arm controls
   }
 
@@ -72,6 +62,6 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
+    return swerveSubsystem.swerveSetpointReached();
   }
 }

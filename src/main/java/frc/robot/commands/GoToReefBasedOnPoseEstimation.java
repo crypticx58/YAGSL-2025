@@ -28,20 +28,15 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   Pose3d ClosestAprilTagPose;
   //ReefHeight reefHeight;
   ArmPreset armPreset;
-  boolean leftSide;
+  boolean againstWall;
   Pose3d reefPose;
   Pose2d swervePoseSetpoint;
-  final PIDController translationalPidController = new PIDController(3.4, 0, 0);
-  final PIDController rotationalPidController = new PIDController(2.6, 0.00, 0);
 
-  public GoToReefBasedOnPoseEstimation(boolean leftSide) {
-    this.leftSide = leftSide;
+  public GoToReefBasedOnPoseEstimation(boolean againstWall) {
+    this.againstWall = againstWall;
     //this.reefHeight = reefHeight;
     //this.armPreset = armPreset;
-    rotationalPidController.enableContinuousInput(-180, 180);
-    translationalPidController.setTolerance(Units.inchesToMeters(1));
-    //translationalPidController.setIZone(Units.inchesToMeters(8));
-    rotationalPidController.setTolerance(1);
+   
     addRequirements(swerveSubsystem);
   }
 
@@ -49,7 +44,8 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   @Override
   public void initialize() {
     ClosestAprilTagPose = visionSubsystem.getClosestReefAprilTagPose();
-    double LeftRightOffset = leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
+    double LeftRightOffset = 0;//leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
+    double distanceOffset = againstWall?ArmConstants.AgainstReefWallDistance:ArmConstants.OffsetReefWallDistance;
     Pose3d LeftRightReefPose = ClosestAprilTagPose.plus(
       new Transform3d(
         new Translation3d(0, LeftRightOffset,0),
@@ -58,8 +54,8 @@ public class GoToReefBasedOnPoseEstimation extends Command {
       );
     swervePoseSetpoint = LeftRightReefPose.plus(
       new Transform3d(
-        new Translation3d(ArmConstants.CoralHorizontalScoringDistance, 0,0),
-        new Rotation3d(0,0,0)
+        new Translation3d(distanceOffset, 0,0),
+        new Rotation3d(0,0,Math.PI)
       )
     ).toPose2d();
     // reefPose = new Pose3d(
@@ -67,11 +63,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
     //   new Rotation3d(LeftRightReefPose.getRotation().getX(), Units.degreesToRadians(reefHeight.pitch), LeftRightReefPose.getRotation().getY())
     //   ).plus(VisionConstants.IntakeOffsetFromReefBranch);
     
-    translationalPidController.reset();
-    rotationalPidController.reset();
-
-    rotationalPidController.setSetpoint(swervePoseSetpoint.getRotation().getDegrees());
-    translationalPidController.setSetpoint(0);
+    swerveSubsystem.setSwervePoseSetpoint(swervePoseSetpoint);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -87,7 +79,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
 
     
     //
-    swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint, translationalPidController, rotationalPidController));
+    swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint));
     //armSubsystem.setArmConfigurationOptimally(armPreset.armConfiguration);
   }
 
@@ -100,6 +92,6 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return translationalPidController.atSetpoint() && rotationalPidController.atSetpoint();
+    return swerveSubsystem.swerveSetpointReached();
   }
 }

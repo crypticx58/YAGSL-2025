@@ -8,4 +8,10 @@ public class ArmConfiguration {
         this.TelescopicPosition = TelescopicPosition;
         this.WristPosition = WristPosition;
     }
+    public double getJointPosition(JointType jointType){
+        if (jointType == JointType.Shoulder) return ShoulderPosition;
+        if (jointType == JointType.Telescopic) return TelescopicPosition;
+        if (jointType == JointType.Wrist) return WristPosition;
+        return 0;
+    }
 }

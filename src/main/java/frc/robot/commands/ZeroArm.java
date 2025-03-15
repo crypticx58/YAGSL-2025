@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Utils.ArmPreset;
 import frc.robot.subsystems.ArmSubsystem;
 
@@ -25,7 +26,7 @@ public class ZeroArm extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    armSubsystem.zeroArmConfigurationOptimally();
+    armSubsystem.setArmConfigurationInOrder(ArmPreset.Zero, ArmConstants.DefaultZeroArmOrder);
   }
 
   // Called once the command ends or is interrupted.
@@ -35,6 +36,6 @@ public class ZeroArm extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return armSubsystem.isArmAtDesiredConfiguration(ArmPreset.Zero.armConfiguration, 2, Units.inchesToMeters(1), 2);
+    return armSubsystem.isArmAtDesiredConfiguration(ArmPreset.Zero.armConfiguration, 4, Units.inchesToMeters(3), 2);
   }
 }

@@ -16,10 +16,13 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.List;
 import java.util.Map;
 
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Utils.ArmConfiguration;
+import frc.robot.Utils.ArmOrder;
 import frc.robot.Utils.ArmPreset;
 import frc.robot.Utils.JointType;
 
@@ -47,7 +50,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
     @Override
     public void periodic(){
-        /////System.out.println(getJointPosition(JointType.Wrist));
+        //System.out.println(getJointPosition(JointType.Wrist));
     }
 
     private void configureJoints() {
@@ -57,7 +60,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         ShoulderJointConfig.inverted(false).idleMode(IdleMode.kBrake);
         TelescopicJointConfig.inverted(false).idleMode(IdleMode.kBrake);
-        WristJointConfig.inverted(false).idleMode(IdleMode.kBrake);
+        WristJointConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(100);
 
         ShoulderJointConfig.encoder.positionConversionFactor(2.2359); // Degrees
         TelescopicJointConfig.encoder.positionConversionFactor(0.0207368236656); // METERS 0.0364823762189
@@ -69,7 +72,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         ShoulderJointConfig.encoder.velocityConversionFactor(0.04); // Degrees PER SEC
         TelescopicJointConfig.encoder.velocityConversionFactor(0.00034561372776); // METERS per sec
-        WristJointConfig.encoder.velocityConversionFactor(1.2); // Degrees per sec
+        WristJointConfig.encoder.velocityConversionFactor(0.24); // Degrees per sec
 
         ShoulderJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0045, 0, 0.000, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
         ShoulderJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.030, 0, 0.000, ClosedLoopSlot.kSlot1).outputRange(-1, 1);
@@ -77,7 +80,8 @@ public class ArmSubsystem extends SubsystemBase {
         TelescopicJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.075, 0, 0, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
         TelescopicJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(3.45, 0, 3, ClosedLoopSlot.kSlot1).outputRange(-1, 1);
 
-        WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0010, 0, 0.000, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
+        WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0001, 0, 0.000, ClosedLoopSlot.kSlot0).outputRange(-1, 1).velocityFF(1/473, ClosedLoopSlot.kSlot0);
+        WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.0025, 0, 0.00, ClosedLoopSlot.kSlot2).outputRange(-1, 1).maxMotion.maxVelocity(75000, ClosedLoopSlot.kSlot2).maxAcceleration(20000, ClosedLoopSlot.kSlot2);
         WristJointConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.00345, 0, 0.000, ClosedLoopSlot.kSlot1).outputRange(-1, 1);
 
         ShoulderJoint.configure(ShoulderJointConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -94,6 +98,10 @@ public class ArmSubsystem extends SubsystemBase {
         Joints.get(jointType).set(percentage);
     }
     public void setJointPosition(JointType jointType, double jointPosition) {
+        setJointPosition(jointType, jointPosition, false);
+    }
+    public void setJointPosition(JointType jointType, double jointPosition, boolean useMotionControl) {
+        useMotionControl = false;
         double arbitraryFeedForward = 0;
         if (jointType == JointType.Shoulder || jointType == JointType.Wrist){
             //arbitraryFeedForward = 0.25*Math.cos(Units.degreesToRadians(getJointPosition(jointType)));
@@ -102,7 +110,7 @@ public class ArmSubsystem extends SubsystemBase {
             Joints.get(jointType).getClosedLoopController().setReference(getJointPosition(jointType), ControlType.kPosition, ClosedLoopSlot.kSlot1, arbitraryFeedForward);
             return;
         }
-        Joints.get(jointType).getClosedLoopController().setReference(jointPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1, arbitraryFeedForward);
+        Joints.get(jointType).getClosedLoopController().setReference(jointPosition, useMotionControl ? ControlType.kMAXMotionPositionControl : ControlType.kPosition, useMotionControl ? ClosedLoopSlot.kSlot2 : ClosedLoopSlot.kSlot1, arbitraryFeedForward);
     }
 
     public void setJointVelocity(JointType jointType, double jointVelocity) {
@@ -156,46 +164,35 @@ public class ArmSubsystem extends SubsystemBase {
             joint.getClosedLoopController().setReference(0, ControlType.kVelocity);
         }
     }
-    public void setArmConfiguration(ArmConfiguration armConfiguration){
+    public void 
+    
+    setArmConfiguration(ArmConfiguration armConfiguration){
         setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
         setJointPosition(JointType.Telescopic, armConfiguration.TelescopicPosition);
         setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
     }
 
     //Has to be called mulitiple times/periodically. Probably should NOT use to zero out the arm
-    public void setArmConfigurationOptimally(ArmConfiguration armConfiguration){
-        if (isJointAtSetpoint(JointType.Shoulder, armConfiguration.ShoulderPosition, 2)){
-            setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
-            setJointPosition(JointType.Telescopic, armConfiguration.TelescopicPosition);
-            setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
-        } else if (getJointPosition(JointType.Shoulder) >= 25) { // We start moving the wrist
-            setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
-            setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
-        } else {
-            setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+    // public void setArmConfigurationOptimally(ArmConfiguration armConfiguration){
+    //     if (isJointAtSetpoint(JointType.Shoulder, armConfiguration.ShoulderPosition, 2)){
+    //         setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+    //         setJointPosition(JointType.Telescopic, armConfiguration.TelescopicPosition);
+    //         setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
+    //     } else if (getJointPosition(JointType.Shoulder) >= 25) { // We start moving the wrist
+    //         setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+    //         setJointPosition(JointType.Wrist, armConfiguration.WristPosition);
+    //     } else {
+    //         setJointPosition(JointType.Shoulder, armConfiguration.ShoulderPosition);
+    //     }
+    // }
+    public void setArmConfigurationInOrder(ArmPreset armPreset, ArmOrder armOrder){
+        if (!isJointAtSetpoint(armOrder.first, armPreset.armConfiguration.getJointPosition(armOrder.first), armOrder.firstTolerance)){
+            setJointPosition(armOrder.first, armPreset.armConfiguration.getJointPosition(armOrder.first), armOrder.first == JointType.Wrist);
+        } else if (!isJointAtSetpoint(armOrder.second, armPreset.armConfiguration.getJointPosition(armOrder.second), armOrder.secondTolerance)) {
+            setJointPosition(armOrder.second, armPreset.armConfiguration.getJointPosition(armOrder.second), armOrder.second == JointType.Wrist);
+        } else if (!isJointAtSetpoint(armOrder.third, armPreset.armConfiguration.getJointPosition(armOrder.third), armOrder.thirdTolerance)) {
+            setJointPosition(armOrder.third, armPreset.armConfiguration.getJointPosition(armOrder.third), armOrder.third == JointType.Wrist);
         }
-    }
-    public void zeroArmConfigurationOptimally(){
-        if (!isJointAtSetpoint(JointType.Telescopic, ArmPreset.Zero.armConfiguration.TelescopicPosition, Units.inchesToMeters(1.5))){
-            setJointPosition(JointType.Telescopic, ArmPreset.Zero.armConfiguration.TelescopicPosition);
-        } else if (!isJointAtSetpoint(JointType.Wrist, ArmPreset.Zero.armConfiguration.WristPosition, 3)) {
-            setJointPosition(JointType.Wrist, ArmPreset.Zero.armConfiguration.WristPosition);
-        } else {
-            setJointPosition(JointType.Shoulder, ArmPreset.Zero.armConfiguration.ShoulderPosition);
-            setJointPosition(JointType.Telescopic, ArmPreset.Zero.armConfiguration.TelescopicPosition);
-            setJointPosition(JointType.Wrist, ArmPreset.Zero.armConfiguration.WristPosition);
-        }
-        
-        // if (isJointAtSetpoint(JointType.Shoulder, 30, 2.5)){
-        //     setJointPosition(JointType.Shoulder, 30);
-        //     setJointPosition(JointType.Telescopic, 24.5);
-        //     setJointPosition(JointType.Wrist, -90);
-        // } else if (getJointPosition(JointType.Shoulder) <= 90) { // We start moving the wrist
-        //     setJointPosition(JointType.Shoulder, 30);
-        //     setJointPosition(JointType.Wrist, -90);
-        // } else {
-        //     setJointPosition(JointType.Shoulder, 30);
-        // }
     }
     public Pose3d getCoralPose3dRelativeToRobot(Pose3d robotPose3d) {
         double TelescopicLength = getJointPosition(JointType.Telescopic);

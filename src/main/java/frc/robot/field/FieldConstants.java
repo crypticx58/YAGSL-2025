@@ -200,6 +200,9 @@ public class FieldConstants
     public static final Pose2d rightIceCream  =
         new Pose2d(Units.inchesToMeters(48), Units.inchesToMeters(86.5), new Rotation2d());
   }
+//   public static class TargetPoses {
+//     public static final Pose2d 
+//   }
   public static class AprilTagIDs
   {
     public static final List<Integer> BlueAllianceReefIdsList = Arrays.asList(18,19,20,21,22,17);
@@ -213,6 +216,20 @@ public class FieldConstants
     public static final int RedRightCoralStationId = 2;
     public static final int BlueProcessorId = 16;
     public static final int RedProcessorId = 3;
+
+    public static final int BlueFrontReefId = 21;
+    public static final int BlueBackReefId = 18;
+    public static final int BlueFrontLeftReefId = 20;
+    public static final int BlueFrontRightReefId = 22;
+    public static final int BlueBackLeftReefId = 19;
+    public static final int BlueBackRightReefId = 17;
+
+    public static final int RedFrontReefId = 10;
+    public static final int RedBackReefId = 7;
+    public static final int RedFrontLeftReefId = 11;
+    public static final int RedFrontRightReefId = 9;
+    public static final int RedBackLeftReefId = 6;
+    public static final int RedBackRightReefId = 8;
     public static List<Integer> getAllianceReefIds(){
         if (DriverStation.getAlliance().isPresent()){
             if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
@@ -262,6 +279,66 @@ public class FieldConstants
             }
         }
         return BlueProcessorId;
+    }
+    public static int getAllianceFrontReefId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueFrontReefId;
+            } else {
+                return RedFrontReefId;
+            }
+        }
+        return BlueFrontReefId;
+    }
+    public static int getAllianceBackReefId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueBackReefId;
+            } else {
+                return RedBackReefId;
+            }
+        }
+        return BlueBackReefId;
+    }
+    public static int getAllianceFrontLeftReefId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueFrontLeftReefId;
+            } else {
+                return RedFrontLeftReefId;
+            }
+        }
+        return BlueFrontLeftReefId;
+    }
+    public static int getAllianceFrontRightReefId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueFrontRightReefId;
+            } else {
+                return RedFrontRightReefId;
+            }
+        }
+        return BlueFrontRightReefId;
+    }
+    public static int getAllianceBackRightReefId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueBackRightReefId;
+            } else {
+                return RedBackRightReefId;
+            }
+        }
+        return BlueBackRightReefId;
+    }
+    public static int getAllianceBackLeftReefId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueBackLeftReefId;
+            } else {
+                return RedBackLeftReefId;
+            }
+        }
+        return BlueBackLeftReefId;
     }
   }
 }

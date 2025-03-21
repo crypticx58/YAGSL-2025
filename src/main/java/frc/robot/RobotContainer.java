@@ -4,10 +4,12 @@
 
 package frc.robot;
 
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Utils.ArmOrder;
 import frc.robot.Utils.ArmPreset;
 import frc.robot.Utils.JointType;
+import frc.robot.Utils.ReefTarget;
 import frc.robot.Utils.InputsManager.ForwardKinematicsInputsManager;
 import frc.robot.commands.ArmControllerCommand;
 import frc.robot.commands.AutoAlignAlgae;
@@ -27,12 +29,22 @@ import swervelib.SwerveInputStream;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
@@ -161,27 +173,30 @@ public class RobotContainer {
     
     driverXbox.rightBumper().whileTrue(new GoToReefBasedOnPoseEstimation(false));
     driverXbox.leftBumper().whileTrue(new GoToReefBasedOnPoseEstimation(true));
-    armXbox.rightTrigger(.5).whileTrue(new GoToProcessorBasedOnPoseEstimation(true));
-    armXbox.leftTrigger(.5).whileTrue(new GoToProcessorBasedOnPoseEstimation(false));
+    // driverXbox.rightTrigger(.5).whileTrue(new GoToProcessorBasedOnPoseEstimation(true));
+    // driverXbox.leftTrigger(.5).whileTrue(new GoToProcessorBasedOnPoseEstimation(false));
+    driverXbox.rightTrigger(.5).whileTrue(swerveSubsystem.pathfindToProcessor(true));
+    driverXbox.leftTrigger(.5).whileTrue(swerveSubsystem.pathfindToProcessor(false));
     //driverXbox.a().whileTrue(new GoToCoralStationGrooveBasedOnPoseEstimation());
-    //driverXbox.y().whileTrue(new AutoAlignAlgae());
+    // driverXbox.y().whileTrue(swerveSubsystem.pathfindToPose(new Pose2d(new Translation2d(11.508, 7.088), Rotation2d.fromDegrees(180.000))));
     
     armXbox.b().whileTrue(new ZeroArm().repeatedly());
     armXbox.povDown().whileTrue(new GoToArmPreset(ArmPreset.LowAlgae).repeatedly());
     armXbox.povRight().whileTrue(new GoToArmPreset(ArmPreset.Processor).repeatedly());
     armXbox.povUp().whileTrue(new GoToArmPreset(ArmPreset.HighAlgae).repeatedly());
     armXbox.povLeft().whileTrue(new GoToArmPreset(ArmPreset.StartingAlgae).repeatedly());
-    armXbox.a().whileTrue(new GoToArmPreset(ArmPreset.CoralStationFeed).repeatedly());
-    // armXbox.x().whileTrue(Commands.run(()->armSubsystem.setArmConfigurationInOrder(ArmPreset.SlingshotAlgae, new ArmOrder(JointType.Shoulder, JointType.Wrist, JointType.Telescopic, 10, 10, Units.inchesToMeters(3))), armSubsystem));
+    armXbox.a().whileTrue(new GoToArmPreset(ArmPreset.FloorAlgae).repeatedly());
+    //armXbox.a().whileTrue(new GoToArmPreset(ArmPreset.CoralStationFeed).repeatedly());
+    //armXbox.x().whileTrue(Commands.run(()->armSubsystem.setArmConfigurationInOrder(ArmPreset.SlingshotAlgae, new ArmOrder(JointType.Shoulder, JointType.Telescopic, JointType.Wrist, 2, Units.inchesToMeters(3), 3)), armSubsystem));
     //armXbox.x().whileTrue(Commands.run(()->armSubsystem.setJointPosition(JointType.Shoulder, 90), armSubsystem));
     //armXbox.a().whileTrue(Commands.run(()->armSubsystem.setJointPosition(JointType.Shoulder, 45), armSubsystem));
 
 
     // armXbox.rightTrigger(.10).whileTrue(Commands.runEnd(()->intakeSubsystem.setIntakeVelocity(armXbox.getRightTriggerAxis()/7), ()->intakeSubsystem.setIntakeVelocity(0), armSubsystem));
     // armXbox.leftTrigger(.10).whileTrue(Commands.runEnd(()->intakeSubsystem.setIntakeVelocity(-armXbox.getLeftTriggerAxis()/7), ()->intakeSubsystem.setIntakeVelocity(0), armSubsystem));
-    armXbox.rightTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleIntake(0.175), armSubsystem));
-    armXbox.leftTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleOutake(-0.25), armSubsystem));
-
+    armXbox.rightTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleIntake(0.185), armSubsystem));
+    armXbox.leftTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleOutake(-1), armSubsystem));
+    armXbox.leftTrigger(.5).and(armXbox.rightTrigger(.5)).onTrue(Commands.runOnce(()->intakeSubsystem.turnOffIntake(), armSubsystem));
     armXbox.y().onTrue(Commands.runOnce(()-> {
       System.out.println("---------------------");
       System.out.println("Shoulder: "+armSubsystem.getJointPosition(JointType.Shoulder));
@@ -190,11 +205,12 @@ public class RobotContainer {
     }));
 
     swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+
     //armSubsystem.setDefaultCommand(armControllerCommand);
-    // if (Robot.isSimulation()) {
-    //   driverXbox.a().onTrue(
-    //       Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
-    // }
+    if (Robot.isSimulation()) {
+      driverXbox.a().onTrue(
+          Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(7.6, 1.178, new Rotation2d()))));
+    }
   }
 
   /**

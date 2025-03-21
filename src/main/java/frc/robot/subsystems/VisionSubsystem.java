@@ -45,7 +45,7 @@ public class VisionSubsystem extends SubsystemBase {
     // photonCamera = new PhotonCamera("PhotonCamera");
     // photonPoseEstimator = new PhotonPoseEstimator(FieldConstants.aprilTagFieldLayout,
     //     PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.RobotToPhotonCameraTransform3d);
-
+    LimelightHelpers.setLEDMode_PipelineControl(VisionConstants.BackLimelightName);
     // Warmup: 
     FieldConstants.aprilTagFieldLayout.getTagPose(1).get();
   }
@@ -71,12 +71,12 @@ public class VisionSubsystem extends SubsystemBase {
     LimelightHelpers.PoseEstimate backLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.BackLimelightName);
     LimelightHelpers.PoseEstimate frontLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.FrontLimelightName);
     // Add it to your pose estimator
-    if (backLimelightMeasurement != null && backLimelightMeasurement.tagCount != 0) {
+    if (backLimelightMeasurement != null && backLimelightMeasurement.tagCount != 0 && backLimelightMeasurement.avgTagDist<= 3.5) {
       swerveSubsystem.swerveDrive.addVisionMeasurement(
         backLimelightMeasurement.pose,
         backLimelightMeasurement.timestampSeconds);
     }
-    if (frontLimelightMeasurement != null && frontLimelightMeasurement.tagCount != 0) {
+    if (frontLimelightMeasurement != null && frontLimelightMeasurement.tagCount != 0 && frontLimelightMeasurement.avgTagDist <= 3.5) {
       swerveSubsystem.swerveDrive.addVisionMeasurement(
         frontLimelightMeasurement.pose,
         frontLimelightMeasurement.timestampSeconds);

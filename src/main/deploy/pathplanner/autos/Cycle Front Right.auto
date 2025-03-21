@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Stand Still"
+            "name": "CycleFrontRight"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
-  "folder": null,
+  "resetOdom": false,
+  "folder": "ReefTargetAutos",
   "choreoAuto": false
 }

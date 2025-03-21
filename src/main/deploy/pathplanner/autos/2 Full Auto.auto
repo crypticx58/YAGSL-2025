@@ -7,25 +7,19 @@
         {
           "type": "named",
           "data": {
-            "name": "GoToClosestRightReef"
+            "name": "CycleFront"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ArmPresetL4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outake"
+            "name": "CycleFrontRight"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

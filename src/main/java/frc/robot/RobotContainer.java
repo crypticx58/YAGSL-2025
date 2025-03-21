@@ -66,21 +66,88 @@ public class RobotContainer {
       .scaleTranslation(0.45).scaleRotation(0.45)
       .allianceRelativeControl(false);
 
+  // final SequentialCommandGroup baseSequentialCommandGroup = new SequentialCommandGroup(
+  //     // new GoToReefBasedOnPoseEstimation(false),
+  //     // new GoToArmPreset(ArmPreset.LowAlgae),
+  //     Commands.runOnce(()->intakeSubsystem.toggleIntake(0.175)),
+  //     new GoToReefBasedOnPoseEstimation(true),
+  //     Commands.waitSeconds(1.5),
+  //     new ParallelCommandGroup(
+  //       new GoToReefBasedOnPoseEstimation(false),
+  //       new ZeroArm()
+  //     ),
+  //     new ParallelCommandGroup(
+  //       swerveSubsystem.pathfindToProcessor(true),
+  //       new GoToArmPreset(ArmPreset.Processor)
+  //     ),
+  //     swerveSubsystem.pathfindToProcessor(false),
+  //     Commands.runOnce(()->intakeSubsystem.toggleOutake(-0.25)),
+  //     Commands.waitSeconds(0.5),
+  //     Commands.runOnce(()->intakeSubsystem.toggleOutake(-0.25)),
+  //     new ZeroArm()
+  //     );
+
   public RobotContainer() {
     // Configure the trigger bindings
-
+    //System.out.println(DriverStation.getAlliance().get());
     NamedCommands.registerCommand("ZeroArm", new ZeroArm());
-    NamedCommands.registerCommand("ArmPresetL1", new GoToArmPreset(ArmPreset.L1));
-    NamedCommands.registerCommand("ArmPresetL2", new GoToArmPreset(ArmPreset.L2));
-    NamedCommands.registerCommand("ArmPresetL3", new GoToArmPreset(ArmPreset.L3));
-    NamedCommands.registerCommand("ArmPresetL4", new GoToArmPreset(ArmPreset.L4));
+    NamedCommands.registerCommand("ArmPresetLowAlgae", new GoToArmPreset(ArmPreset.LowAlgae));
+    NamedCommands.registerCommand("ArmPresetHighAlgae", new GoToArmPreset(ArmPreset.HighAlgae));
+    NamedCommands.registerCommand("ArmPresetProcessor", new GoToArmPreset(ArmPreset.Processor));
+    NamedCommands.registerCommand("WaitHalfSecond", Commands.waitSeconds(0.5));
+    NamedCommands.registerCommand("WaitFullSecond", Commands.waitSeconds(1));
+    NamedCommands.registerCommand("WaitFullHalfSecond", Commands.waitSeconds(1.5));
+    NamedCommands.registerCommand("CycleFront", new SequentialCommandGroup(
+      swerveSubsystem.pathfindToReefTarget(ReefTarget.Front, true),
+      new GoToArmPreset(ArmPreset.LowAlgae),
+      swerveSubsystem.getBaseAutonSequentialCommandGroup()));
+    NamedCommands.registerCommand("CycleFrontLeft", new SequentialCommandGroup(
+      swerveSubsystem.pathfindToReefTarget(ReefTarget.FrontLeft, true),
+      new GoToArmPreset(ArmPreset.HighAlgae),
+      swerveSubsystem.getBaseAutonSequentialCommandGroup()));
+    NamedCommands.registerCommand("CycleFrontRight", new SequentialCommandGroup(
+      swerveSubsystem.pathfindToReefTarget(ReefTarget.FrontRight, true),
+      new GoToArmPreset(ArmPreset.HighAlgae),
+      swerveSubsystem.getBaseAutonSequentialCommandGroup()));
+    NamedCommands.registerCommand("CycleBack", new SequentialCommandGroup(
+      swerveSubsystem.pathfindToReefTarget(ReefTarget.Back, true),
+      new GoToArmPreset(ArmPreset.HighAlgae),
+      swerveSubsystem.getBaseAutonSequentialCommandGroup()));
+    NamedCommands.registerCommand("CycleBackRight", new SequentialCommandGroup(
+      swerveSubsystem.pathfindToReefTarget(ReefTarget.BackRight, true),
+      new GoToArmPreset(ArmPreset.LowAlgae),
+      swerveSubsystem.getBaseAutonSequentialCommandGroup()));
+    NamedCommands.registerCommand("CycleBackLeft", new SequentialCommandGroup(
+      swerveSubsystem.pathfindToReefTarget(ReefTarget.BackLeft, true),
+      new GoToArmPreset(ArmPreset.LowAlgae),
+      swerveSubsystem.getBaseAutonSequentialCommandGroup()));
 
-    NamedCommands.registerCommand("GoToClosestLeftReef", new GoToReefBasedOnPoseEstimation(true));
-    NamedCommands.registerCommand("GoToClosestRightReef", new GoToReefBasedOnPoseEstimation(false));
-    NamedCommands.registerCommand("GoToClosestCoralStationFeed", new GoToCoralStationGrooveBasedOnPoseEstimation());
+    NamedCommands.registerCommand("GoToClosestReefAgaistWall", new GoToReefBasedOnPoseEstimation(true));
+    NamedCommands.registerCommand("GoToClosestReefOffset", new GoToReefBasedOnPoseEstimation(false));
+    NamedCommands.registerCommand("GoToProcessorOffset", new GoToProcessorBasedOnPoseEstimation(true));
+    NamedCommands.registerCommand("GoToProcessorNoOffset", new GoToProcessorBasedOnPoseEstimation(false));
 
-    NamedCommands.registerCommand("Intake", new IntakeCommand());
-    NamedCommands.registerCommand("Outake", new OutakeCommand());
+    NamedCommands.registerCommand("GoToProcessorOffsetPathfind", swerveSubsystem.pathfindToProcessor(true));
+    NamedCommands.registerCommand("GoToProcessorNoOffsetPathfind",  swerveSubsystem.pathfindToProcessor(false));
+
+    NamedCommands.registerCommand("GoToReefTargetFrontOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.Front, true));
+    NamedCommands.registerCommand("GoToReefTargetFrontNoOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.Front, false));
+    NamedCommands.registerCommand("GoToReefTargetFrontRightOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.FrontRight, true));
+    NamedCommands.registerCommand("GoToReefTargetFrontRightNoOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.FrontRight, false));
+    NamedCommands.registerCommand("GoToReefTargetFrontLeftOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.FrontLeft, true));
+    NamedCommands.registerCommand("GoToReefTargetFrontLeftNoOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.FrontLeft, false));
+
+    NamedCommands.registerCommand("GoToReefTargetBackOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.Back, true));
+    NamedCommands.registerCommand("GoToReefTargetBackNoOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.Back, false));
+    NamedCommands.registerCommand("GoToReefTargetBackRightOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.BackRight, true));
+    NamedCommands.registerCommand("GoToReefTargetBackRightNoOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.BackRight, false));
+    NamedCommands.registerCommand("GoToReefTargetBackLeftOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.BackLeft, true));
+    NamedCommands.registerCommand("GoToReefTargetBackLeftNoOffset", swerveSubsystem.pathfindToReefTarget(ReefTarget.BackLeft, false));
+
+    NamedCommands.registerCommand("Intake", Commands.runOnce(()->intakeSubsystem.toggleIntake(0.175)));
+    NamedCommands.registerCommand("Outake", Commands.runOnce(()->intakeSubsystem.toggleOutake(-0.25)));
+    NamedCommands.registerCommand("TurnOffIntake", Commands.runOnce(()->intakeSubsystem.turnOffIntake()));
+    
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Routine", autoChooser);

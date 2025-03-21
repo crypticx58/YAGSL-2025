@@ -1,0 +1,97 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "GoToClosestReefOffset"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ArmPresetLowAlgae"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ToggleIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "GoToClosestReefAgaistWall"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitFullHalfSecond"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "GoToClosestReefOffset"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ZeroArm"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "GoToProcessorOffset"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ArmPresetProcessor"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "GoToProcessorNoOffset"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ToggleOutake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitHalfSecond"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ToggleOutake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ZeroArm"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}

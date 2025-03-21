@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Taxi Path"
+            "name": "CycleBackLeft"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
-  "folder": null,
+  "resetOdom": false,
+  "folder": "ReefTargetAutos",
   "choreoAuto": false
 }

@@ -4,15 +4,30 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Utils.ArmPreset;
+import frc.robot.Utils.ReefTarget;
+import frc.robot.commands.GoToArmPreset;
+import frc.robot.commands.GoToReefBasedOnPoseEstimation;
+import frc.robot.commands.ZeroArm;
+import frc.robot.field.FieldConstants;
+import frc.robot.field.FieldConstants.AprilTagIDs;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveInputStream;
@@ -38,6 +53,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   private static SwerveSubsystem INSTANCE;
   public final SwerveDrive swerveDrive;
+  public final IntakeSubsystem intakeSubsystem = IntakeSubsystem.getInstance();
   public final SwerveController swerveController;
   final PIDController translationalPidController = new PIDController(3.7, 0, 0);
   final PIDController rotationalPidController = new PIDController(2.75, 0.00, 0);
@@ -80,6 +96,11 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.setCosineCompensator(false);
     //swerveDrive.setAngularVelocityCompensation(true, false, -0.15);
     //swerveDrive.pushOffsetsToEncoders();
+
+    rotationalPidController.enableContinuousInput(-180, 180);
+    translationalPidController.setTolerance(Units.inchesToMeters(2));
+    rotationalPidController.setTolerance(2);
+    zeroGyro();
     setupPathPlanner();
 
   }
@@ -95,7 +116,7 @@ public class SwerveSubsystem extends SubsystemBase {
     try {
       config = RobotConfig.fromGUISettings();
 
-      final boolean enableFeedforward = false;
+      final boolean enableFeedforward = true;
       // Configure AutoBuilder last
       AutoBuilder.configure(
           swerveDrive::getPose,
@@ -119,9 +140,9 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic
               // drive trains
-              new PIDConstants(4.5, 0.0, 0),
+              new PIDConstants(4.1, 0.0, 0),
               // Translation PID constants
-              new PIDConstants(3.75, 0.0, 0)
+              new PIDConstants(3.25, 0.0, 0)
           // Rotation PID constants
           ),
           config,
@@ -146,9 +167,6 @@ public class SwerveSubsystem extends SubsystemBase {
       // Handle exception as needed
       e.printStackTrace();
     }
-    rotationalPidController.enableContinuousInput(-180, 180);
-    translationalPidController.setTolerance(Units.inchesToMeters(1));
-    rotationalPidController.setTolerance(1);
 
     // Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
@@ -158,6 +176,44 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command pathfindToPose(Pose2d pose) {
     return AutoBuilder.pathfindToPose(pose, new PathConstraints(swerveDrive.getMaximumChassisVelocity(), 4.5,
         swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720)));
+  }
+  public Command pathfindToReefTarget(ReefTarget reefTarget, boolean offset) {
+    Pose3d targetPose = FieldConstants.aprilTagFieldLayout.getTagPose(reefTarget.ApriltagId).get();
+    Pose2d pathfindSwervePoseSetpoint = targetPose.plus(
+      new Transform3d(
+        new Translation3d(offset?ArmConstants.OffsetReefWallDistance:ArmConstants.AgainstReefWallDistance, 0,0),
+        new Rotation3d(0,0,Math.PI)
+      )
+    ).toPose2d();
+    return this.pathfindToPose(pathfindSwervePoseSetpoint);
+  }
+  public SequentialCommandGroup getBaseAutonSequentialCommandGroup(){
+    return new SequentialCommandGroup(
+      // new GoToReefBasedOnPoseEstimation(false),
+      // new GoToArmPreset(ArmPreset.LowAlgae),
+      Commands.runOnce(()->intakeSubsystem.toggleIntake(0.19)),
+      new GoToReefBasedOnPoseEstimation(true),
+      Commands.waitSeconds(1.5),
+      new GoToReefBasedOnPoseEstimation(false),
+      new ZeroArm(),
+      this.pathfindToProcessor(true),
+      new GoToArmPreset(ArmPreset.Processor),
+      this.pathfindToProcessor(false),
+      Commands.runOnce(()->intakeSubsystem.toggleOutake(-0.25)),
+      Commands.waitSeconds(0.5),
+      Commands.runOnce(()->intakeSubsystem.turnOffIntake()),
+      new ZeroArm()
+      );
+  }
+  public Command pathfindToProcessor(boolean offset) {
+    Pose3d targetPose = FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceProcessorId()).get();
+    Pose2d pathfindSwervePoseSetpoint = targetPose.plus(
+      new Transform3d(
+        new Translation3d(offset?ArmConstants.OffsetProcessorScoringDistance:ArmConstants.ProcessorScoringDistance, 0,0),
+        new Rotation3d(0,0,Math.PI)
+      )
+    ).toPose2d();
+    return this.pathfindToPose(pathfindSwervePoseSetpoint);
   }
 
   // public Command pathfindToSetRange(Pose2d targetPose, double rangeMeters, boolean frontFacingTarget) {

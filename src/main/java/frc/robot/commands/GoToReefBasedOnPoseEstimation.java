@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Utils.ArmConfiguration;
 import frc.robot.Utils.ArmPreset;
 import frc.robot.field.FieldConstants;
 import frc.robot.subsystems.ArmSubsystem;
@@ -28,6 +29,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   Pose3d ClosestAprilTagPose;
   //ReefHeight reefHeight;
   ArmPreset armPreset;
+  ArmConfiguration armConfig;
   boolean againstWall;
   Pose3d reefPose;
   Pose2d swervePoseSetpoint;
@@ -44,7 +46,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   @Override
   public void initialize() {
     ClosestAprilTagPose = visionSubsystem.getClosestReefAprilTagPose();
-    double LeftRightOffset = 0;//leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
+    double LeftRightOffset = Units.inchesToMeters(0.5);//leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
     double distanceOffset = againstWall?ArmConstants.AgainstReefWallDistance:ArmConstants.OffsetReefWallDistance;
     Pose3d LeftRightReefPose = ClosestAprilTagPose.plus(
       new Transform3d(
@@ -58,6 +60,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
         new Rotation3d(0,0,Math.PI)
       )
     ).toPose2d();
+    armConfig = new ArmConfiguration(Math.asin(Math.abs(ClosestAprilTagPose.getZ()-swerveSubsystem.swerveDrive.getPose().getY())+Units.inchesToMeters(16)), Units.inchesToMeters(23.5),0);
     // reefPose = new Pose3d(
     //   new Translation3d(LeftRightReefPose.getX(), LeftRightReefPose.getY(), reefHeight.height), 
     //   new Rotation3d(LeftRightReefPose.getRotation().getX(), Units.degreesToRadians(reefHeight.pitch), LeftRightReefPose.getRotation().getY())
@@ -80,7 +83,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
     
     //
     swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint));
-    //armSubsystem.setArmConfigurationOptimally(armPreset.armConfiguration);
+    //armSubsystem.setArmConfiguration(armConfig);
   }
 
   // Called once the command ends or is interrupted.

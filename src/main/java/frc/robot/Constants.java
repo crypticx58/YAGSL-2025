@@ -16,9 +16,15 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Unit;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Utils.ArmConfiguration;
 import frc.robot.Utils.ArmOrder;
+import frc.robot.Utils.ArmPreset;
 import frc.robot.Utils.JointType;
+import frc.robot.commands.GoToArmPreset;
+import frc.robot.commands.GoToReefBasedOnPoseEstimation;
+import frc.robot.commands.ZeroArm;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -45,11 +51,11 @@ public final class Constants {
     public static final double ShoulderJointHeightOffGroundMeters = Units.inchesToMeters(16);
     public static final ArmOrder DefaultZeroArmOrder = new ArmOrder(JointType.Wrist, JointType.Telescopic, JointType.Shoulder, 17, Units.inchesToMeters(2), 3);
 
-    public static final double AgainstReefWallDistance = Units.inchesToMeters(15+1); // With bumpers, 4 inches
+    public static final double AgainstReefWallDistance = Units.inchesToMeters(15+0); // With bumpers, 4 inches
     public static final double OffsetReefWallDistance = Units.inchesToMeters(16+15+8); 
 
-    public static final double ProcessorScoringDistance = Units.inchesToMeters(16+15+4); // With bumpers, 4 inches
-    public static final double OffsetProcessorScoringDistance = Units.inchesToMeters(16+15+8); 
+    public static final double ProcessorScoringDistance = Units.inchesToMeters(16+15+2); // With bumpers, 4 inches
+    public static final double OffsetProcessorScoringDistance = Units.inchesToMeters(23+15+1); 
     
     //public static final double OptimalCoralScoringWristAngleDegrees = 45; // Relative to the front
 
@@ -84,4 +90,7 @@ public final class Constants {
         new Translation3d(0, 0, 0),
         new Rotation3d(0, 0, 0));
   }
+  // public static class AutoConstants{
+  //   public static 
+  // }
 }

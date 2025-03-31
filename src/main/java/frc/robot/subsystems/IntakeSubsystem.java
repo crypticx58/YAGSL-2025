@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Utils.IntakeOutakeState;
 import frc.robot.Utils.IntakeSensorsStates;
@@ -40,7 +41,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private IntakeSubsystem() {
     SparkMaxConfig IntakeMotorConfig = new SparkMaxConfig();
-    IntakeMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(30);
+    IntakeMotorConfig.inverted(true).idleMode(IdleMode.kCoast).smartCurrentLimit(25);
     IntakeMotor.configure(IntakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -74,6 +75,15 @@ public class IntakeSubsystem extends SubsystemBase {
     //   LimelightHelpers.setLEDMode_ForceOff(VisionConstants.BackLimelightName);
     // }
   }
+  public void toggleIntakeDefaultSpeed(){
+    this.toggleIntake(ArmConstants.DefaultIntakeSpeed);
+  }
+  public void toggleOutakeDefaultSpeed(){
+    this.toggleOutake(ArmConstants.DefaultOutakeSpeed);
+  }
+  public void toggleOutakeSlowSpeed(){
+    this.toggleOutake(ArmConstants.SlowOutakeSpeed);
+  }
   public void toggleOutake(double speed){
     if (intakeOutakeState == IntakeOutakeState.Idle || intakeOutakeState == IntakeOutakeState.Intaking) {
       setIntakeVelocity(speed);
@@ -88,7 +98,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
   public void turnOffIntake(){
     setIntakeVelocity(0);
-    LimelightHelpers.setLEDMode_ForceBlink(VisionConstants.BackLimelightName);
+    intakeOutakeState = IntakeOutakeState.Idle;
+    LimelightHelpers.setLEDMode_ForceOff(VisionConstants.BackLimelightName);
   }
 
   public void setIntakeVelocity(double velocity){ // percentage from -1.0 to 1.0

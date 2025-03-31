@@ -185,6 +185,12 @@ public class SwerveSubsystem extends SubsystemBase {
         new Rotation3d(0,0,Math.PI)
       )
     ).toPose2d();
+  public Command pathfindToFieldTarget(FieldTarget fieldTarget, boolean isOffset) {
+    Pose3d targetPose = fieldTarget.getTargetPose();//FieldConstants.aprilTagFieldLayout.getTagPose(reefTarget.ApriltagId).get();
+    Transform3d offset = new Transform3d();
+    currentFieldTarget = fieldTarget;
+    offset = FieldConstants.getFieldTargetOffset(fieldTarget, isOffset);
+    Pose2d pathfindSwervePoseSetpoint = targetPose.plus(offset).toPose2d();
     return this.pathfindToPose(pathfindSwervePoseSetpoint);
   }
   public SequentialCommandGroup getBaseAutonSequentialCommandGroup(){

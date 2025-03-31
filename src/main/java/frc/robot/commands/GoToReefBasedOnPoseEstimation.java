@@ -28,7 +28,6 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   VisionSubsystem visionSubsystem = VisionSubsystem.getInstance();
   Pose3d ClosestAprilTagPose;
   //ReefHeight reefHeight;
-  ArmPreset armPreset;
   ArmConfiguration armConfig;
   boolean againstWall;
   Pose3d reefPose;
@@ -46,7 +45,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   @Override
   public void initialize() {
     ClosestAprilTagPose = visionSubsystem.getClosestReefAprilTagPose();
-    double LeftRightOffset = Units.inchesToMeters(0.5);//leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
+    double LeftRightOffset = Units.inchesToMeters(0.25);//leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
     double distanceOffset = againstWall?ArmConstants.AgainstReefWallDistance:ArmConstants.OffsetReefWallDistance;
     Pose3d LeftRightReefPose = ClosestAprilTagPose.plus(
       new Transform3d(
@@ -60,7 +59,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
         new Rotation3d(0,0,Math.PI)
       )
     ).toPose2d();
-    armConfig = new ArmConfiguration(Math.asin(Math.abs(ClosestAprilTagPose.getZ()-swerveSubsystem.swerveDrive.getPose().getY())+Units.inchesToMeters(16)), Units.inchesToMeters(23.5),0);
+    //armConfig = new ArmConfiguration(Math.asin(Math.abs(ClosestAprilTagPose.getZ()-swerveSubsystem.swerveDrive.getPose().getY())+Units.inchesToMeters(16)), Units.inchesToMeters(23.5),0);
     // reefPose = new Pose3d(
     //   new Translation3d(LeftRightReefPose.getX(), LeftRightReefPose.getY(), reefHeight.height), 
     //   new Rotation3d(LeftRightReefPose.getRotation().getX(), Units.degreesToRadians(reefHeight.pitch), LeftRightReefPose.getRotation().getY())

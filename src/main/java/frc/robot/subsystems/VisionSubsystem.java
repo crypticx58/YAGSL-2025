@@ -67,20 +67,36 @@ public class VisionSubsystem extends SubsystemBase {
     LimelightHelpers.SetRobotOrientation("limelight-back", robotYaw.getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
     LimelightHelpers.SetRobotOrientation("limelight-front", robotYaw.getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
 
-    // Get the pose estimate
-    LimelightHelpers.PoseEstimate backLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.BackLimelightName);
-    LimelightHelpers.PoseEstimate frontLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.FrontLimelightName);
-    // Add it to your pose estimator
-    if (backLimelightMeasurement != null && backLimelightMeasurement.tagCount != 0 && backLimelightMeasurement.avgTagDist<= 3.5) {
-      swerveSubsystem.swerveDrive.addVisionMeasurement(
-        backLimelightMeasurement.pose,
-        backLimelightMeasurement.timestampSeconds);
-    }
-    if (frontLimelightMeasurement != null && frontLimelightMeasurement.tagCount != 0 && frontLimelightMeasurement.avgTagDist <= 3.5) {
-      swerveSubsystem.swerveDrive.addVisionMeasurement(
-        frontLimelightMeasurement.pose,
-        frontLimelightMeasurement.timestampSeconds);
-    }
+    // // Get the pose estimate
+    // LimelightHelpers.PoseEstimate backLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.BackLimelightName);
+    // LimelightHelpers.PoseEstimate frontLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.FrontLimelightName);
+    // // Add it to your pose estimator
+    // if (backLimelightMeasurement != null && backLimelightMeasurement.tagCount != 0 && backLimelightMeasurement.avgTagDist<= 3.5) {
+    //   swerveSubsystem.swerveDrive.addVisionMeasurement(
+    //     backLimelightMeasurement.pose,
+    //     backLimelightMeasurement.timestampSeconds);
+    // }
+    // if (frontLimelightMeasurement != null && frontLimelightMeasurement.tagCount != 0 && frontLimelightMeasurement.avgTagDist <= 3.5) {
+    //   swerveSubsystem.swerveDrive.addVisionMeasurement(
+    //     frontLimelightMeasurement.pose,
+    //     frontLimelightMeasurement.timestampSeconds);
+    // }
+
+     // Get the pose estimate
+     LimelightHelpers.PoseEstimate backLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.BackLimelightName);
+     LimelightHelpers.PoseEstimate frontLimelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(VisionConstants.FrontLimelightName);
+     // Add it to your pose estimator
+     if (backLimelightMeasurement != null && backLimelightMeasurement.tagCount != 0 && backLimelightMeasurement.avgTagDist<= 3.5) {
+       swerveSubsystem.swerveDrive.addVisionMeasurement(
+         backLimelightMeasurement.pose,
+         backLimelightMeasurement.timestampSeconds);
+     }
+     if (frontLimelightMeasurement != null && frontLimelightMeasurement.tagCount != 0 && frontLimelightMeasurement.avgTagDist <= 3.5) {
+       swerveSubsystem.swerveDrive.addVisionMeasurement(
+         frontLimelightMeasurement.pose,
+         frontLimelightMeasurement.timestampSeconds);
+     }
+
     // var visionEst = getPhotonEstimatedGlobalPose();
     // visionEst.ifPresent(
     //     est -> {
@@ -136,10 +152,54 @@ public class VisionSubsystem extends SubsystemBase {
   //     }
   //   }
   // }
+  // private void updateLimelightEstimationStdDevs(
+  //     Optional<LimelightHelpers.PoseEstimate> estimatedPose) {
+  //   if (estimatedPose.isEmpty()) {
+  //     // No pose input. Default to single-tag std devs
+  //     curStdDevs = VisionConstants.kSingleTagStdDevs;
 
-  public Matrix<N3, N1> getPhotonEstimationStdDevs() {
-    return curStdDevs;
-  }
+  //   } else {
+  //     // Pose present. Start running Heuristic
+  //     var estStdDevs = VisionConstants.kSingleTagStdDevs;
+  //     int numTags = 0;
+  //     double avgDist = 0;
+
+  //     // Precalculation - see how many tags we found, and calculate an
+  //     // average-distance metric
+  //     for (var tgt : targets) {
+  //       var tagPose = photonPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+  //       if (tagPose.isEmpty())
+  //         continue;
+  //       numTags++;
+  //       avgDist += tagPose
+  //           .get()
+  //           .toPose2d()
+  //           .getTranslation()
+  //           .getDistance(estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+  //     }
+
+  //     if (numTags == 0) {
+  //       // No tags visible. Default to single-tag std devs
+  //       curStdDevs = VisionConstants.kSingleTagStdDevs;
+  //     } else {
+  //       // One or more tags visible, run the full heuristic.
+  //       avgDist /= numTags;
+  //       // Decrease std devs if multiple targets are visible
+  //       if (numTags > 1)
+  //         estStdDevs = VisionConstants.kMultiTagStdDevs;
+  //       // Increase std devs based on (average) distance
+  //       if (numTags == 1 && avgDist > 4)
+  //         estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+  //       else
+  //         estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+  //       curStdDevs = estStdDevs;
+  //     }
+  //   }
+  // }
+
+  // public Matrix<N3, N1> getPhotonEstimationStdDevs() {
+  //   return curStdDevs;
+  // }
 
   public Pose3d getClosestReefAprilTagPose(){
     double closestDistance = 100000;

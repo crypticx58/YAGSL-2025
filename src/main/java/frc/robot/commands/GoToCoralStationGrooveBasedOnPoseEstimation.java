@@ -26,10 +26,12 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
   VisionSubsystem visionSubsystem = VisionSubsystem.getInstance();
   Pose3d ClosestGroovePose;
   Pose2d swervePoseSetpoint;
+  boolean offsetScroingDistance;
   ArmConfiguration armConfiguration = ArmPreset.CoralStationFeed.armConfiguration;
   
 
-  public GoToCoralStationGrooveBasedOnPoseEstimation() {
+  public GoToCoralStationGrooveBasedOnPoseEstimation(boolean offsetScroingDistance) {
+    this.offsetScroingDistance = offsetScroingDistance;
     addRequirements(swerveSubsystem);
   }
 
@@ -39,7 +41,7 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
     ClosestGroovePose = visionSubsystem.getClosestCoralStationGroovePose();
     swervePoseSetpoint = ClosestGroovePose.plus(
       new Transform3d(
-        new Translation3d(ArmConstants.OptimalCoralStationFeedDistance, 0,0),
+        new Translation3d(offsetScroingDistance?ArmConstants.OffsetCoralStationDistance:ArmConstants.OptimalCoralStationDistance, Units.inchesToMeters(4),0),
         new Rotation3d(0,0,Math.PI)
       )
     ).toPose2d();
@@ -50,7 +52,6 @@ public class GoToCoralStationGrooveBasedOnPoseEstimation extends Command {
   @Override
   public void execute() {
     swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint));
-    //armSubsystem.setArmConfigurationOptimally(armConfiguration); Seperate driving controls from arm controls
   }
 
   // Called once the command ends or is interrupted.

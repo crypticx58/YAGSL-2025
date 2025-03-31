@@ -19,6 +19,18 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Utils.BargeTarget;
+import frc.robot.Utils.CoralStationTarget;
+import frc.robot.Utils.FieldTarget;
+import frc.robot.Utils.ProcessorTarget;
+import frc.robot.Utils.ReefTarget;
+import frc.robot.Utils.ReefTarget.BackLeftReef;
+import frc.robot.Utils.ReefTarget.BackReef;
+import frc.robot.Utils.ReefTarget.BackRightReef;
+import frc.robot.Utils.ReefTarget.FrontLeftReef;
+import frc.robot.Utils.ReefTarget.FrontReef;
+import frc.robot.Utils.ReefTarget.FrontRightReef;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +49,68 @@ public class FieldConstants
   public static final double fieldWidth    = Units.inchesToMeters(317);
   public static final double startingLineX =
       Units.inchesToMeters(299.438); // Measured from the inside of starting line
+    public static final Transform3d getFieldTargetOffset(FieldTarget fieldTarget, boolean isOffset){
+        Transform3d offset = new Transform3d();
+        if (ReefTarget.isAlgaeReefTarget(fieldTarget)){
+        offset =  new Transform3d(
+          new Translation3d(isOffset?ArmConstants.OffsetReefWallDistance:ArmConstants.AgainstReefWallDistance, 0,0),
+          new Rotation3d(0,0,Math.PI)
+        );
+        } else if (ReefTarget.isCoralReefTarget(fieldTarget)){
+        offset =  new Transform3d(
+          new Translation3d(isOffset?ArmConstants.OffsetCoralReefScoringDistance:ArmConstants.CoralReefScoringDistance, 0,0),
+          new Rotation3d(0,0,Math.PI)
+        );
+        }else if (fieldTarget instanceof BargeTarget){
+        offset = new Transform3d(
+            new Translation3d(isOffset?ArmConstants.OffsetReefWallDistance:ArmConstants.AgainstReefWallDistance, 0,0),
+            new Rotation3d(0,0,Math.PI)
+            );
+        } else if (fieldTarget instanceof ProcessorTarget){
+        offset = new Transform3d(
+            new Translation3d(isOffset?ArmConstants.OffsetProcessorScoringDistance:ArmConstants.ProcessorScoringDistance, 0,0),
+            new Rotation3d(0,0,Math.PI)
+            );
+        } else if (fieldTarget instanceof CoralStationTarget){
+        offset = new Transform3d(
+            new Translation3d(isOffset?ArmConstants.OptimalCoralStationDistance:ArmConstants.OptimalCoralStationDistance, 0,0),
+            new Rotation3d(0,0,Math.PI)
+            );
+        }
+        return offset;
+    }
+    public static final FieldTarget getCoralTargetFromReefTarget(FieldTarget reefTarget, boolean isLeftSide){
+        if (isLeftSide){
+            if (reefTarget == ReefTarget.FrontReef.Center || reefTarget == ReefTarget.FrontReef.Right){
+                return ReefTarget.FrontReef.Left;
+            } else if (reefTarget == ReefTarget.BackReef.Center || reefTarget == ReefTarget.BackReef.Right){
+                return ReefTarget.BackReef.Left;
+            } else if (reefTarget == ReefTarget.FrontLeftReef.Center || reefTarget == ReefTarget.FrontLeftReef.Right){
+                return ReefTarget.FrontLeftReef.Left;
+            } else if (reefTarget == ReefTarget.FrontRightReef.Center || reefTarget == ReefTarget.FrontRightReef.Right){
+                return ReefTarget.FrontRightReef.Left;
+            } else if (reefTarget == ReefTarget.BackLeftReef.Center || reefTarget == ReefTarget.BackLeftReef.Right){
+                return ReefTarget.BackLeftReef.Left;
+            } else if (reefTarget == ReefTarget.BackRightReef.Center || reefTarget == ReefTarget.BackRightReef.Right){
+                return ReefTarget.BackRightReef.Left;
+            }
+        } else {
+            if (reefTarget == ReefTarget.FrontReef.Center || reefTarget == ReefTarget.FrontReef.Left){
+                return ReefTarget.FrontReef.Right;
+            } else if (reefTarget == ReefTarget.BackReef.Center || reefTarget == ReefTarget.BackReef.Left){
+                return ReefTarget.BackReef.Right;
+            } else if (reefTarget == ReefTarget.FrontLeftReef.Center || reefTarget == ReefTarget.FrontLeftReef.Left){
+                return ReefTarget.FrontLeftReef.Right;
+            } else if (reefTarget == ReefTarget.FrontRightReef.Center || reefTarget == ReefTarget.FrontRightReef.Left){
+                return ReefTarget.FrontRightReef.Right;
+            } else if (reefTarget == ReefTarget.BackLeftReef.Center || reefTarget == ReefTarget.BackLeftReef.Left){
+                return ReefTarget.BackLeftReef.Right;
+            } else if (reefTarget == ReefTarget.BackRightReef.Center || reefTarget == ReefTarget.BackRightReef.Left){
+                return ReefTarget.BackRightReef.Right;
+            }
+        }
+        return reefTarget;
+    }
 
   public static enum ReefHeight
   {
@@ -62,8 +136,10 @@ public class FieldConstants
   }
 
   public static class Barge
-  {
-
+  { 
+    // Relative to the player
+    public static final Transform3d LeftBargeOffset = new Transform3d(new Translation3d(Units.inchesToMeters(12),-1.103,0), new Rotation3d());
+    public static final Transform3d RightBargeOffset = new Transform3d(new Translation3d(Units.inchesToMeters(12),1.103,0), new Rotation3d());
     public static final Translation2d farCage    =
         new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(286.779));
     public static final Translation2d middleCage =
@@ -105,6 +181,8 @@ public class FieldConstants
   public static class Reef
   {
     public static final double LeftRightOffsetFromCenterMeters = Units.inchesToMeters(6.469+0.44);
+    public static final Transform3d LeftOffsetTransformFromCenterMeters = new Transform3d(new Translation3d(0,-LeftRightOffsetFromCenterMeters,0), new Rotation3d());
+    public static final Transform3d RightOffsetTransformFromCenterMeters = new Transform3d(new Translation3d(0,LeftRightOffsetFromCenterMeters,0), new Rotation3d());
     public static final Translation2d center         =
         new Translation2d(Units.inchesToMeters(176.746), Units.inchesToMeters(158.501));
     public static final double        faceToZoneLine =
@@ -230,6 +308,10 @@ public class FieldConstants
     public static final int RedFrontRightReefId = 9;
     public static final int RedBackLeftReefId = 6;
     public static final int RedBackRightReefId = 8;
+
+    public static final int BlueBargeId = 14;
+    public static final int RedBargeId = 5;
+    
     public static List<Integer> getAllianceReefIds(){
         if (DriverStation.getAlliance().isPresent()){
             if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
@@ -339,6 +421,16 @@ public class FieldConstants
             }
         }
         return BlueBackLeftReefId;
+    }
+    public static int getAllianceBargeId(){
+        if (DriverStation.getAlliance().isPresent()){
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+                return BlueBargeId;
+            } else {
+                return RedBargeId;
+            }
+        }
+        return BlueBargeId;
     }
   }
 }

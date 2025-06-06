@@ -6,10 +6,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Utils.ArmOrder;
 import frc.robot.Utils.ArmPreset;
 import frc.robot.Utils.BargeTarget;
 import frc.robot.Utils.CoralStationTarget;
 import frc.robot.Utils.FieldTarget;
+import frc.robot.Utils.JointType;
 import frc.robot.Utils.ProcessorTarget;
 import frc.robot.Utils.ReefTarget;
 import frc.robot.field.FieldConstants.CoralStation;
@@ -51,7 +53,12 @@ public class GoToFieldTargetArmPreset extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    armSubsystem.setArmConfiguration(armPreset.armConfiguration);
+    if (armPreset == ArmPreset.Processor){
+      //armSubsystem.setArmConfigurationInOrder(armPreset, new ArmOrder(JointType.Shoulder, JointType.Wrist, JointType.Telescopic, 3, 10, Units.inchesToMeters(2)));
+      armSubsystem.setArmConfiguration(armPreset.armConfiguration);
+    } else {
+      armSubsystem.setArmConfigurationOptimally(armPreset.armConfiguration);
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -61,6 +68,6 @@ public class GoToFieldTargetArmPreset extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return armSubsystem.isArmAtDesiredConfiguration(armPreset.armConfiguration, 3, Units.inchesToMeters(2), 5);
+    return armSubsystem.isArmAtDesiredConfiguration(armPreset.armConfiguration, 3, Units.inchesToMeters(2), 17);
   }
 }

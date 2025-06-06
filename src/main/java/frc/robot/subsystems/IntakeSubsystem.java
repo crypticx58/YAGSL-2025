@@ -41,7 +41,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private IntakeSubsystem() {
     SparkMaxConfig IntakeMotorConfig = new SparkMaxConfig();
-    IntakeMotorConfig.inverted(true).idleMode(IdleMode.kCoast).smartCurrentLimit(25);
+    IntakeMotorConfig.inverted(true).idleMode(IdleMode.kCoast).smartCurrentLimit(32);
     IntakeMotor.configure(IntakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -67,7 +67,7 @@ public class IntakeSubsystem extends SubsystemBase {
     if (intakeOutakeState == IntakeOutakeState.Idle || intakeOutakeState == IntakeOutakeState.Outaking) {
       setIntakeVelocity(speed);
       intakeOutakeState = IntakeOutakeState.Intaking;
-      LimelightHelpers.setLEDMode_ForceBlink(VisionConstants.BackLimelightName);
+      //LimelightHelpers.setLEDMode_ForceBlink(VisionConstants.BackLimelightName);
     }
     // } else if (intakeOutakeState == IntakeOutakeState.Intaking) {
     //   setIntakeVelocity(0);
@@ -88,7 +88,7 @@ public class IntakeSubsystem extends SubsystemBase {
     if (intakeOutakeState == IntakeOutakeState.Idle || intakeOutakeState == IntakeOutakeState.Intaking) {
       setIntakeVelocity(speed);
       intakeOutakeState = IntakeOutakeState.Outaking;
-      LimelightHelpers.setLEDMode_ForceOff(VisionConstants.BackLimelightName);
+      //LimelightHelpers.setLEDMode_ForceOff(VisionConstants.BackLimelightName);
     }
     // } else if (intakeOutakeState == IntakeOutakeState.Outaking) {
     //   setIntakeVelocity(0);
@@ -99,7 +99,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public void turnOffIntake(){
     setIntakeVelocity(0);
     intakeOutakeState = IntakeOutakeState.Idle;
-    LimelightHelpers.setLEDMode_ForceOff(VisionConstants.BackLimelightName);
+    //LimelightHelpers.setLEDMode_ForceOff(VisionConstants.BackLimelightName);
   }
 
   public void setIntakeVelocity(double velocity){ // percentage from -1.0 to 1.0

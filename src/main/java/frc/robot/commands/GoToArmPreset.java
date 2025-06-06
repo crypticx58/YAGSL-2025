@@ -37,6 +37,9 @@ public class GoToArmPreset extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    if (armSubsystem.isArmAtDesiredConfiguration(armPreset.armConfiguration, 3, Units.inchesToMeters(2), 5)){
+      System.out.println();
+    }
     return armSubsystem.isArmAtDesiredConfiguration(armPreset.armConfiguration, 3, Units.inchesToMeters(2), 17);
   }
 }

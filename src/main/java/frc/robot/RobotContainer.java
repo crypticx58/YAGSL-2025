@@ -22,6 +22,7 @@ import frc.robot.commands.GoToFieldTargetArmPreset;
 import frc.robot.commands.GoToFieldTargetBasedOnPoseEstimation;
 import frc.robot.commands.GoToProcessorBasedOnPoseEstimation;
 import frc.robot.commands.GoToReefBasedOnPoseEstimation;
+import frc.robot.commands.GoToReefFieldTargetBasedOnPoseEstimation;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.OutakeCommand;
 import frc.robot.commands.ZeroArm;
@@ -84,12 +85,13 @@ public class RobotContainer {
       () -> -driverXbox.getLeftX())
       .withControllerRotationAxis(() -> -driverXbox.getRightX())
       .deadband(OperatorConstants.SWERVE_DEADBAND)
-      .scaleTranslation(0.45).scaleRotation(0.45)
+      .scaleTranslation(0.3).scaleRotation(0.3)
       .allianceRelativeControl(false);
 
   public RobotContainer() {
     // Configure the trigger bindings
     //System.out.println(DriverStation.getAlliance().get());
+    DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("ZeroArm", new ZeroArm());
     NamedCommands.registerCommand("ArmPresetLowAlgae", new GoToArmPreset(ArmPreset.LowAlgae));
     NamedCommands.registerCommand("ArmPresetHighAlgae", new GoToArmPreset(ArmPreset.HighAlgae));
@@ -136,18 +138,22 @@ public class RobotContainer {
   
     driverXbox.rightBumper().whileTrue(new GoToFieldTargetBasedOnPoseEstimation(true));
     driverXbox.leftBumper().whileTrue(new GoToFieldTargetBasedOnPoseEstimation(false));
-    driverXbox.y().whileTrue(new GoToFieldTargetArmPreset().repeatedly());
+    //driverXbox.y().whileTrue(new ZeroArm().andThen(new GoToFieldTargetArmPreset().repeatedly()));
+    driverXbox.y().whileTrue(new GoToReefBasedOnPoseEstimation(false));
     driverXbox.x().whileTrue(new ZeroArm().repeatedly());
-    driverXbox.a().whileTrue(new GoToArmPreset(ArmPreset.FloorAlgae).repeatedly());
-    driverXbox.rightTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleIntakeDefaultSpeed(), armSubsystem));
+    driverXbox.a().whileTrue(new ZeroArm().andThen(new GoToArmPreset(ArmPreset.FloorAlgae).repeatedly()));
+    driverXbox.rightTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleIntakeDefaultSpeed(), intakeSubsystem));
     driverXbox.leftTrigger(.5).onTrue(Commands.runOnce(()->intakeSubsystem.toggleOutakeDefaultSpeed(), armSubsystem));
     driverXbox.leftTrigger(.5).and(driverXbox.rightTrigger(.5)).onTrue(Commands.runOnce(()->intakeSubsystem.turnOffIntake(), armSubsystem));
     
     driverXbox.povDown().whileTrue(new GoToArmPreset(ArmPreset.LowAlgae).repeatedly());
     //driverXbox.povRight().whileTrue(new GoToArmPreset(ArmPreset.Processor).repeatedly());
-    driverXbox.povRight().whileTrue(Commands.runOnce(()->intakeSubsystem.toggleOutake(ArmConstants.SlowOutakeSpeed)));
+    driverXbox.povRight().whileTrue(Commands.runOnce(()->intakeSubsystem.toggleOutakeSlowSpeed()));
     driverXbox.povUp().whileTrue(new GoToArmPreset(ArmPreset.HighAlgae).repeatedly());
-    driverXbox.povLeft().whileTrue(new GoToArmPreset(ArmPreset.StartingAlgae).repeatedly());
+    // driverXbox.povLeft().whileTrue(Commands.runOnce(()->armSubsystem.setArmConfigurationInOrder(ArmPreset.BargeAlgae, new ArmOrder(JointType.Shoulder, JointType.Wrist, JointType.Telescopic, 3, 10, Units.inchesToMeters(2))), armSubsystem).repeatedly());
+    driverXbox.povLeft().whileTrue(Commands.runOnce(()->armSubsystem.setArmConfigurationOptimally(ArmPreset.BargeAlgae.armConfiguration)).repeatedly());
+    // driverXbox.povLeft().whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(true, true));
+    // driverXbox.povRight().whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(false, true));
 
     buttonPad.button(1).whileTrue(swerveSubsystem.pathfindToFieldTarget(ReefTarget.FrontLeftReef.Center, true));
     buttonPad.button(1).onTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = ReefTarget.FrontLeftReef.Center));
@@ -176,13 +182,17 @@ public class RobotContainer {
     buttonPad.button(10).whileTrue(swerveSubsystem.pathfindToFieldTarget(ProcessorTarget.Processor,true));
     buttonPad.button(10).onTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = ProcessorTarget.Processor));
 
-    buttonPad.button(11).whileTrue(
-      Commands.runOnce(()->swerveSubsystem.setCurrentFieldTarget(FieldConstants.getCoralTargetFromReefTarget(swerveSubsystem.getCurrentFieldTarget(), true)))
-      .andThen(swerveSubsystem.pathfindToFieldTarget(swerveSubsystem.currentFieldTarget, true)));
+    // buttonPad.button(11).whileTrue(
+    //   Commands.runOnce(()->{swerveSubsystem.setCurrentFieldTarget(FieldConstants.getCoralTargetFromReefTarget(swerveSubsystem.getCurrentFieldTarget(), true)); System.out.println(swerveSubsystem.currentFieldTarget);})
+    //   .andThen(swerveSubsystem.pathfindToFieldTarget(swerveSubsystem.currentFieldTarget, true)));
 
-    buttonPad.button(12).whileTrue(
-      Commands.runOnce(()->swerveSubsystem.setCurrentFieldTarget(FieldConstants.getCoralTargetFromReefTarget(swerveSubsystem.getCurrentFieldTarget(), false)))
-      .andThen(swerveSubsystem.pathfindToFieldTarget(swerveSubsystem.currentFieldTarget, true)));
+    // buttonPad.button(12).whileTrue(
+    //   Commands.runOnce(()->{swerveSubsystem.setCurrentFieldTarget(FieldConstants.getCoralTargetFromReefTarget(swerveSubsystem.getCurrentFieldTarget(), false)); System.out.println(swerveSubsystem.currentFieldTarget);})
+    //   .andThen(swerveSubsystem.pathfindToFieldTarget(swerveSubsystem.currentFieldTarget, true)));
+
+    // buttonPad.button(11).whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(true, false));
+
+    // buttonPad.button(12).whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(false, false));
 
     // armXbox.a().whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(true, false));
     // armXbox.b().whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(false, false));
@@ -190,20 +200,22 @@ public class RobotContainer {
     buttonPad.button(9).whileTrue(swerveSubsystem.removeAlgaeFromCurrentReefTarget());
     // buttonPad.povDown().whileTrue(new GoToReefFieldTargetBasedOnPoseEstimation(false, false));
 
-    buttonPad.povUp().onTrue(swerveSubsystem.pathfindToFieldTarget(BargeTarget.Center,false));
-    buttonPad.povUp().onTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = BargeTarget.Center));
+    buttonPad.axisLessThan(0, -0.9).whileTrue(swerveSubsystem.pathfindToFieldTarget(BargeTarget.Center,false));
+    buttonPad.axisLessThan(0, -0.9).whileTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = BargeTarget.Center));
 
-    buttonPad.povLeft().onTrue(swerveSubsystem.pathfindToFieldTarget(BargeTarget.Left,false));
-    buttonPad.povLeft().onTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = BargeTarget.Left));
+    buttonPad.axisGreaterThan(0, 0.9).whileTrue(new AutoAlignAlgae());
 
-    buttonPad.povRight().onTrue(swerveSubsystem.pathfindToFieldTarget(BargeTarget.Right,false));
-    buttonPad.povRight().onTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = BargeTarget.Right));
+    buttonPad.axisGreaterThan(1, 0.9).whileTrue(swerveSubsystem.pathfindToFieldTarget(BargeTarget.Left,false));
+    buttonPad.axisGreaterThan(1, 0.9).whileTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = BargeTarget.Left));
+
+    buttonPad.axisLessThan(1, -0.9).whileTrue(swerveSubsystem.pathfindToFieldTarget(BargeTarget.Right,false));
+    buttonPad.axisLessThan(1, -0.9).whileTrue(Commands.runOnce(()->swerveSubsystem.currentFieldTarget = BargeTarget.Right));
 
 
     //armXbox.a().whileTrue(new GoToArmPreset(ArmPreset.CoralStationFeed).repeatedly());
     //armXbox.x().whileTrue(Commands.run(()->armSubsystem.setArmConfigurationInOrder(ArmPreset.SlingshotAlgae, new ArmOrder(JointType.Shoulder, JointType.Telescopic, JointType.Wrist, 2, Units.inchesToMeters(3), 3)), armSubsystem));
-    //armXbox.x().whileTrue(Commands.run(()->armSubsystem.setJointPosition(JointType.Shoulder, 90), armSubsystem));
-    //armXbox.a().whileTrue(Commands.run(()->armSubsystem.setJointPosition(JointType.Shoulder, 45), armSubsystem));
+    // armXbox.x().whileTrue(Commands.run(()->armSubsystem.setJointPosition(JointType.Wrist, 90), armSubsystem));
+    // armXbox.a().whileTrue(Commands.run(()->armSubsystem.setJointPosition(JointType.Wrist, 0), armSubsystem));
 
 
     // armXbox.rightTrigger(.10).whileTrue(Commands.runEnd(()->intakeSubsystem.setIntakeVelocity(armXbox.getRightTriggerAxis()/7), ()->intakeSubsystem.setIntakeVelocity(0), armSubsystem));

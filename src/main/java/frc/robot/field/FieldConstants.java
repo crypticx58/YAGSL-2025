@@ -63,7 +63,7 @@ public class FieldConstants
         );
         }else if (fieldTarget instanceof BargeTarget){
         offset = new Transform3d(
-            new Translation3d(isOffset?ArmConstants.OffsetReefWallDistance:ArmConstants.AgainstReefWallDistance, 0,0),
+            new Translation3d(isOffset?ArmConstants.OffBargeScoringDistance:ArmConstants.BargeScoringDistance, 0,0),
             new Rotation3d(0,0,Math.PI)
             );
         } else if (fieldTarget instanceof ProcessorTarget){

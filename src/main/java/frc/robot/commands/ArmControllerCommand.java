@@ -23,8 +23,8 @@ public class ArmControllerCommand extends Command {
     @Override
     public void execute() {
         ArmSpeeds armSpeeds = forwardKinematicsInputsManager.getArmSpeeds();
-        armSubsystem.setJointVelocity(JointType.Shoulder, armSpeeds.ShoulderSpeedDPS);
-        armSubsystem.setJointVelocity(JointType.Telescopic, armSpeeds.TelescopicSpeedMPS);
+        //armSubsystem.setJointVelocity(JointType.Shoulder, armSpeeds.ShoulderSpeedDPS);
+        //armSubsystem.setJointVelocity(JointType.Telescopic, armSpeeds.TelescopicSpeedMPS);
         armSubsystem.setJointVelocity(JointType.Wrist, armSpeeds.WristSpeedDPS);
     }
 

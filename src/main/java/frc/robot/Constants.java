@@ -50,25 +50,28 @@ public final class Constants {
   public static class ArmConstants {
     public static final Pose3d BasePose3d = new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0));
     public static final double ShoulderJointHeightOffGroundMeters = Units.inchesToMeters(16);
-    public static final ArmOrder DefaultZeroArmOrder = new ArmOrder(JointType.Wrist, JointType.Telescopic, JointType.Shoulder, 5, Units.inchesToMeters(2), 3);
+    public static final ArmOrder DefaultZeroArmOrder = new ArmOrder(JointType.Wrist, JointType.Telescopic, JointType.Shoulder, 17, Units.inchesToMeters(2), 3);
 
-    public static final double AgainstReefWallDistance = Units.inchesToMeters(15+1); // With bumpers, 4 inches
+    public static final double AgainstReefWallDistance = Units.inchesToMeters(15+6-2.25+1); // With bumpers, 4 inches
     public static final double OffsetReefWallDistance = Units.inchesToMeters(16+15+8+5); 
 
-    public static final double CoralReefScoringDistance = Units.inchesToMeters(15+4); // With bumpers, 4 inches
+    public static final double BargeScoringDistance = Units.inchesToMeters(15-8.5); // With bumpers, 4 inches
+    public static final double OffBargeScoringDistance = Units.inchesToMeters(16+15+8+5); 
+
+    public static final double CoralReefScoringDistance = Units.inchesToMeters(15+5); // With bumpers, 4 inches
     public static final double OffsetCoralReefScoringDistance = Units.inchesToMeters(16+15+8+5); 
 
-    public static final double ProcessorScoringDistance = Units.inchesToMeters(16+15+2); // With bumpers, 4 inches
-    public static final double OffsetProcessorScoringDistance = Units.inchesToMeters(23+15+0); 
+    public static final double ProcessorScoringDistance = Units.inchesToMeters(16+15+3); // With bumpers, 4 inches
+    public static final double OffsetProcessorScoringDistance = Units.inchesToMeters(23+15+3); 
     
     //public static final double OptimalCoralScoringWristAngleDegrees = 45; // Relative to the front
 
-    public static final double OptimalCoralStationDistance = Units.inchesToMeters(15+17.25+4); // With bumpers, 4 inches
-    public static final double OffsetCoralStationDistance = Units.inchesToMeters(19+4+12); // With bumpers, 4 inches
+    public static final double OptimalCoralStationDistance = Units.inchesToMeters(15+17.25+2.5); // With bumpers, 4 inches
+    public static final double OffsetCoralStationDistance = Units.inchesToMeters(19+4+12+4); // With bumpers, 4 inches
 
-    public static final double DefaultIntakeSpeed = 0.7;
+    public static final double DefaultIntakeSpeed = 0.8;
     public static final double DefaultOutakeSpeed = -1;
-    public static final double SlowOutakeSpeed = -0.25;
+    public static final double SlowOutakeSpeed = -0.5;
 
     public static final double WristJointLengthMeters = Units.inchesToMeters(4); //TODO
     public static final Transform3d RobotToShoulderJointTransform = new Transform3d(
@@ -87,6 +90,7 @@ public final class Constants {
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     public static final int AprilTagPipelineIndex = 0;
     public static final int NeuralDetectorPipelineIndex = 1;
+    public static final int ColorDetectorPipelineIndex = 2;
     public static final String BackLimelightName = "limelight-back";
     public static final String FrontLimelightName = "limelight-front";
 

@@ -16,30 +16,40 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Utils.ArmConfiguration;
 import frc.robot.Utils.ArmPreset;
 import frc.robot.Utils.BargeTarget;
+import frc.robot.Utils.ReefTarget;
 import frc.robot.field.FieldConstants;
+import frc.robot.field.FieldConstants.Reef;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class GoToBargeBasedOnPoseEstimation extends Command {
+public class GoToReefFieldTargetBasedOnPoseEstimation extends Command {
   SwerveSubsystem  swerveSubsystem = SwerveSubsystem.getInstance();
   ArmSubsystem armSubsystem = ArmSubsystem.getInstance();
   VisionSubsystem visionSubsystem = VisionSubsystem.getInstance();
+  Pose3d ClosestGroovePose;
   Pose2d swervePoseSetpoint;
-  BargeTarget bargeTarget;
+  //BargeTarget bargeTarget;
   boolean isOffset;
+  boolean isLeftSide;
+  ArmConfiguration armConfiguration = ArmPreset.CoralStationFeed.armConfiguration;
+  
 
-  public GoToBargeBasedOnPoseEstimation(BargeTarget bargeTarget, boolean isOffset) {
-    this.bargeTarget = bargeTarget;
+  public GoToReefFieldTargetBasedOnPoseEstimation(boolean isLeftSide, boolean isOffset) {
     this.isOffset = isOffset;
+    this.isLeftSide = isLeftSide;
     addRequirements(swerveSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    swervePoseSetpoint = bargeTarget.TargetPose.plus(FieldConstants.getFieldTargetOffset(bargeTarget, true)).toPose2d();
+    swerveSubsystem.currentFieldTarget = FieldConstants.getCoralTargetFromReefTarget(swerveSubsystem.getCurrentFieldTarget(), isLeftSide);
+    Pose2d targetPose = swerveSubsystem.getCurrentFieldTarget().getTargetPose().plus(FieldConstants.getFieldTargetOffset(swerveSubsystem.getCurrentFieldTarget(), isOffset)).toPose2d();
+    // swerveSubsystem.currentFieldTarget = ReefTarget.Coral;
+    
+    swervePoseSetpoint = targetPose;
     swerveSubsystem.setSwervePoseSetpoint(swervePoseSetpoint);
   }
 
@@ -47,6 +57,7 @@ public class GoToBargeBasedOnPoseEstimation extends Command {
   @Override
   public void execute() {
     swerveSubsystem.swerveDrive.setChassisSpeeds(swerveSubsystem.chassisSpeedsForSwerveSetpointWithPID(swervePoseSetpoint));
+    //armSubsystem.setArmConfigurationOptimally(armConfiguration); Seperate driving controls from arm controls
   }
 
   // Called once the command ends or is interrupted.

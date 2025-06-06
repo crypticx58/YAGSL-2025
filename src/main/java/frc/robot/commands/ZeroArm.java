@@ -36,6 +36,6 @@ public class ZeroArm extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return armSubsystem.isArmAtDesiredConfiguration(ArmPreset.Zero.armConfiguration, 3, Units.inchesToMeters(2), 17);
+    return armSubsystem.isArmAtDesiredConfiguration(ArmPreset.Zero.armConfiguration, 3, Units.inchesToMeters(2), 5);
   }
 }

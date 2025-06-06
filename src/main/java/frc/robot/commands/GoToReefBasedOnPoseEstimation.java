@@ -46,7 +46,7 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   public void initialize() {
     ClosestAprilTagPose = visionSubsystem.getClosestReefAprilTagPose();
     double LeftRightOffset = Units.inchesToMeters(0.25);//leftSide?-FieldConstants.Reef.LeftRightOffsetFromCenterMeters:FieldConstants.Reef.LeftRightOffsetFromCenterMeters;
-    double distanceOffset = againstWall?ArmConstants.AgainstReefWallDistance:ArmConstants.OffsetReefWallDistance;
+    double distanceOffset = Units.inchesToMeters(45);//againstWall?ArmConstants.AgainstReefWallDistance:ArmConstants.OffsetReefWallDistance;
     Pose3d LeftRightReefPose = ClosestAprilTagPose.plus(
       new Transform3d(
         new Translation3d(0, LeftRightOffset,0),
@@ -94,6 +94,6 @@ public class GoToReefBasedOnPoseEstimation extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return swerveSubsystem.swerveSetpointReached();
+    return false;//swerveSubsystem.swerveSetpointReached();
   }
 }
